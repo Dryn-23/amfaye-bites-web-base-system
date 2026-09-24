@@ -1,0 +1,8 @@
+{
+  "name": "amfaye-bites",
+  "private": true,
+  "scripts": {
+    "install:all": "npm install --prefix backend && npm install --prefix frontend",
+    "test": "npm test --prefix backend && npm run build --prefix frontend"
+  }
+}

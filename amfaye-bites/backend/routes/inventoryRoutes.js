@@ -1,0 +1,13 @@
+import { Router } from "express";
+import * as c from "../controllers/inventoryController.js";
+import { auth } from "../middleware/authMiddleware.js";
+import { admin, staff } from "../middleware/roleMiddleware.js";
+import { wrap } from "../utils/validators.js";
+const r = Router();
+r.use(auth);
+r.get("/", staff, wrap(c.list));
+r.get("/history", staff, wrap(c.history));
+r.post("/", admin, wrap(c.create));
+r.put("/:id", admin, wrap(c.update));
+r.post("/:id/adjust", admin, wrap(c.adjust));
+export default r;
