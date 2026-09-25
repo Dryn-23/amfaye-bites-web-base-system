@@ -62,5 +62,5 @@ The API tests create an isolated database and do not modify a user's configured 
 npm run install:all
 npm test
 ```
-
+Set-ExecutionPolicy -Scope Process -ExecutionPolicy Bypass
 For browser checks, start `npm run demo` in backend and `npm run dev` in frontend, then run frontend `npm run test:browser` with the temporary admin password in `DEMO_ADMIN_PASSWORD`. See README for Chromium installation and PowerShell commands. The browser test writes test customers/orders; only run it against a disposable development database.
