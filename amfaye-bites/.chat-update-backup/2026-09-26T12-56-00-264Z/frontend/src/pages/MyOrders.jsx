@@ -1,4 +1,3 @@
-import OrderChatButton from "../components/OrderChatButton";
 import { useEffect, useState } from "react";
 import { Link, useParams, useLocation } from "react-router-dom";
 import { ArrowUpRight, Printer, CheckCircle2, RefreshCw } from "lucide-react";
@@ -50,7 +49,6 @@ export default function MyOrders() {
             </div>
           )}
           <div className="order-detail panel">
-<OrderChatButton order={data} />
             <div className="section-heading">
               <div>
                 <h2>AMFAYE BITES</h2>

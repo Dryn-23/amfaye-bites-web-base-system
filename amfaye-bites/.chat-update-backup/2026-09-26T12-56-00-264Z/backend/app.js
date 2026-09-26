@@ -1,4 +1,3 @@
-import chats from "./routes/chatRoutes.js";
 import notifications from "./routes/notificationRoutes.js";
 import express from "express";
 import cors from "cors";
@@ -55,7 +54,6 @@ app.use("/api", (req, res, next) =>
         .json({ message: "Database unavailable. Please try again shortly." }),
 );
 for (const [path, router] of Object.entries({
-chats,
   auth,
   products,
   categories,

@@ -1,4 +1,3 @@
-import Messages from "./pages/Messages";
 import { useEffect } from "react";
 import { Routes, Route, Outlet, useLocation, Navigate } from "react-router-dom";
 import Navbar from "./components/Navbar";
@@ -117,8 +116,7 @@ export default function App() {
             </ProtectedRoute>
           }
         />
-        <Route path="messages/:chatId?" element={<ProtectedRoute roles={["customer"]}><Messages /></ProtectedRoute>} />
-<Route path="unauthorized" element={<Unauthorized />} />
+        <Route path="unauthorized" element={<Unauthorized />} />
         <Route path="*" element={<NotFound />} />
       </Route>
       <Route
@@ -130,8 +128,7 @@ export default function App() {
         }
       >
         <Route index element={<AdminHome />} />
-        <Route path="messages/:chatId?" element={<ProtectedRoute roles={["admin"]}><Messages /></ProtectedRoute>} />
-<Route path="pos" element={<POS />} />
+        <Route path="pos" element={<POS />} />
         <Route path="orders" element={<Orders />} />
         <Route path="inventory" element={<Inventory />} />
         {[

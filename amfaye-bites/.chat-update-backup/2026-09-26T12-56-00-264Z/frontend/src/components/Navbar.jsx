@@ -1,4 +1,3 @@
-import ChatNavLink from "./ChatNavLink";
 import NotificationBell from "./NotificationBell";
 import { Link, NavLink } from "react-router-dom";
 import {
@@ -57,7 +56,6 @@ export default function Navbar() {
             <NavLink to="/contact">Contact</NavLink>
           </nav>
           <div className="nav-actions">
-<ChatNavLink />
             <NotificationBell />
             <Link className="user-link" to={user ? "/profile" : "/login"}>
               <UserRound size={18} />

@@ -1,4 +1,3 @@
-import ChatNavLink from "./ChatNavLink";
 import { NavLink, Link, useNavigate } from "react-router-dom";
 import {
   LayoutDashboard,
@@ -38,7 +37,6 @@ export default function Sidebar() {
       <Logo />
       <span className="sidebar-caption">YOUR BUSINESS, AT A GLANCE</span>
       <nav>
-<ChatNavLink staff />
         {links
           .filter(
             ([path]) =>
