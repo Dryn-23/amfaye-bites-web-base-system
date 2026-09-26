@@ -14,7 +14,21 @@ const schema = new mongoose.Schema(
     },
     senderRole: { type: String, enum: ["customer", "admin"], required: true },
     senderName: { type: String, required: true, maxlength: 100 },
-    text: { type: String, required: true, trim: true, maxlength: 1000 },
+    text: { type: String, default: "", trim: true, maxlength: 1000 },
+    attachment: {
+      type: new mongoose.Schema(
+        {
+          file: { type: mongoose.Schema.Types.ObjectId, required: true },
+          mime: { type: String, enum: ["image/jpeg"], required: true },
+          bytes: { type: Number, required: true },
+          width: Number,
+          height: Number,
+          sha256: { type: String, required: true },
+        },
+        { _id: false },
+      ),
+      default: undefined,
+    },
     clientMessageId: { type: String, required: true, maxlength: 100 },
   },
   { timestamps: true },
