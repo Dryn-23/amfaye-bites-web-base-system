@@ -1,3 +1,4 @@
+import { notifyOrderStatus } from "./notificationService.js";
 import mongoose from "mongoose";
 import crypto from "node:crypto";
 import {
@@ -225,6 +226,7 @@ export async function createOrder(body, user) {
         { $set: { items: [] } },
         { session },
       );
+    await notifyOrderStatus(order, session);
     result = order;
   });
   return result;
@@ -326,6 +328,7 @@ export async function changeStatus(orderId, status, user) {
       ],
       { session },
     );
+    await notifyOrderStatus(order, session);
     result = order;
   });
   return result;

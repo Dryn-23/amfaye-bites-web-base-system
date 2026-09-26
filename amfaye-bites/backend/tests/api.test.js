@@ -591,3 +591,122 @@ test("Production entry point starts with environment configuration and serves he
     child.kill("SIGTERM");
   }
 });
+
+test("Customer notifications persist for each order status and are owner-only", async () => {
+  const login = await req("post", "/auth/login", null, {
+    login: "testcustomer",
+    password: "Changed-Test-1234",
+  });
+  const token = login.body.token;
+  assert.equal(login.status, 200);
+  assert.equal((await req("get", "/notifications")).status, 401);
+  const body = makeOrder(products[1]);
+  const placed = await req("post", "/orders", token, body);
+  assert.equal(placed.status, 201);
+  const orderId = placed.body._id;
+  const retried = await req("post", "/orders", token, body);
+  assert.equal(retried.body._id, orderId);
+  assert.equal(await M.Notification.countDocuments({ order: orderId }), 1);
+  for (const status of ["Confirmed", "Preparing", "Ready for Pickup"]) {
+    assert.equal(
+      (await req("put", `/orders/${orderId}/status`, admin, { status })).status,
+      200,
+    );
+  }
+  // Failed completion must never send a completion notification.
+  assert.equal(
+    (
+      await req("put", `/orders/${orderId}/status`, admin, {
+        status: "Completed",
+      })
+    ).status,
+    400,
+  );
+  assert.equal(
+    await M.Notification.countDocuments({
+      order: orderId,
+      status: "Completed",
+    }),
+    0,
+  );
+  const feed = await req("get", "/notifications", token);
+  assert.equal(feed.status, 200);
+  const notifications = feed.body.items.filter((n) => n.order === orderId);
+  assert.deepEqual(
+    notifications.map((n) => n.status).sort(),
+    ["Confirmed", "Pending", "Preparing", "Ready for Pickup"].sort(),
+  );
+  const ready = notifications.find((n) => n.status === "Ready for Pickup");
+  assert.match(ready.title, /ready for pickup/i);
+  assert.equal(ready.orderNumber, placed.body.number);
+  assert.equal(ready.readAt, null);
+  // Query strings cannot override the authenticated owner.
+  const foreign = await req("get", `/notifications?user=${ready.user}`, other);
+  assert.ok(!foreign.body.items.some((n) => n.order === orderId));
+  assert.equal(
+    (await req("put", `/notifications/${ready._id}/read`, other, {})).status,
+    404,
+  );
+  const marked = await req(
+    "put",
+    `/notifications/${ready._id}/read`,
+    token,
+    {},
+  );
+  assert.ok(marked.body.readAt);
+  const again = await req("get", "/notifications", token);
+  assert.equal(again.body.unreadCount, feed.body.unreadCount - 1);
+  const through = again.body.items[0].createdAt;
+  assert.equal(
+    (await req("put", "/notifications/read-all", token, { through })).status,
+    200,
+  );
+  assert.equal((await req("get", "/notifications", token)).body.unreadCount, 0);
+  await req("post", "/payments/cash", admin, {
+    order: orderId,
+    amountReceived: 500,
+  });
+  assert.equal(
+    (
+      await req("put", `/orders/${orderId}/status`, admin, {
+        status: "Completed",
+      })
+    ).status,
+    200,
+  );
+  const final = await req("get", "/notifications", token);
+  assert.equal(final.body.items[0].status, "Completed");
+  assert.equal(final.body.unreadCount, 1);
+  // An old read-all cutoff must not swallow a newer update.
+  await req("put", "/notifications/read-all", token, { through });
+  assert.equal((await req("get", "/notifications", token)).body.unreadCount, 1);
+  const cancelledOrder = await req(
+    "post",
+    "/orders",
+    token,
+    makeOrder(products[1]),
+  );
+  await req("put", `/orders/${cancelledOrder.body._id}/status`, admin, {
+    status: "Cancelled",
+  });
+  assert.ok(
+    await M.Notification.exists({
+      order: cancelledOrder.body._id,
+      status: "Cancelled",
+    }),
+  );
+  const before = await M.Notification.countDocuments();
+  assert.equal(
+    (await req("post", "/orders", token, makeOrder(products[4]))).status,
+    409,
+  );
+  assert.equal(await M.Notification.countDocuments(), before);
+  const pos = await req(
+    "post",
+    "/orders",
+    admin,
+    makeOrder(products[1], { source: "pos", amountReceived: 500 }),
+  );
+  assert.equal(pos.status, 201);
+  assert.equal(await M.Notification.countDocuments({ order: pos.body._id }), 0);
+});

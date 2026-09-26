@@ -242,3 +242,5 @@ export const AuditLog = model(
   },
   [[{ createdAt: -1 }, {}]],
 );
+
+export { default as Notification } from "./Notification.js";

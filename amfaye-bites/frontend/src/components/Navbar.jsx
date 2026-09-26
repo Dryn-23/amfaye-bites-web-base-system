@@ -1,3 +1,4 @@
+import NotificationBell from "./NotificationBell";
 import { Link, NavLink } from "react-router-dom";
 import {
   ShoppingBag,
@@ -55,6 +56,7 @@ export default function Navbar() {
             <NavLink to="/contact">Contact</NavLink>
           </nav>
           <div className="nav-actions">
+            <NotificationBell />
             <Link className="user-link" to={user ? "/profile" : "/login"}>
               <UserRound size={18} />
               <span>{user ? user.name.split(" ")[0] : "Sign in"}</span>

@@ -1,0 +1,877 @@
+--- a/backend/models/index.js
++++ b/backend/models/index.js
+@@ -242,3 +242,5 @@
+   },
+   [[{ createdAt: -1 }, {}]],
+ );
++
++export { default as Notification } from "./Notification.js";
+--- a/backend/services/orderService.js
++++ b/backend/services/orderService.js
+@@ -1,3 +1,4 @@
++import { notifyOrderStatus } from "./notificationService.js";
+ import mongoose from "mongoose";
+ import crypto from "node:crypto";
+ import {
+@@ -225,6 +226,7 @@
+         { $set: { items: [] } },
+         { session },
+       );
++    await notifyOrderStatus(order, session);
+     result = order;
+   });
+   return result;
+@@ -326,6 +328,7 @@
+       ],
+       { session },
+     );
++    await notifyOrderStatus(order, session);
+     result = order;
+   });
+   return result;
+--- a/backend/app.js
++++ b/backend/app.js
+@@ -1,3 +1,4 @@
++import notifications from "./routes/notificationRoutes.js";
+ import express from "express";
+ import cors from "cors";
+ import helmet from "helmet";
+@@ -37,15 +38,13 @@
+   }),
+ );
+ app.get("/api/health", (req, res) =>
+-  res
+-    .status(mongoose.connection.readyState === 1 ? 200 : 503)
+-    .json({
+-      success: mongoose.connection.readyState === 1,
+-      message:
+-        mongoose.connection.readyState === 1
+-          ? "Amfaye Bites API is running"
+-          : "Database unavailable",
+-    }),
++  res.status(mongoose.connection.readyState === 1 ? 200 : 503).json({
++    success: mongoose.connection.readyState === 1,
++    message:
++      mongoose.connection.readyState === 1
++        ? "Amfaye Bites API is running"
++        : "Database unavailable",
++  }),
+ );
+ app.use("/api", (req, res, next) =>
+   mongoose.connection.readyState === 1
+@@ -63,6 +62,7 @@
+   payments,
+   users,
+   reports,
++  notifications,
+ }))
+   app.use("/api/" + path, router);
+ app.use("/api", extras);
+--- a/frontend/src/components/Navbar.jsx
++++ b/frontend/src/components/Navbar.jsx
+@@ -1,3 +1,4 @@
++import NotificationBell from "./NotificationBell";
+ import { Link, NavLink } from "react-router-dom";
+ import {
+   ShoppingBag,
+@@ -55,6 +56,7 @@
+             <NavLink to="/contact">Contact</NavLink>
+           </nav>
+           <div className="nav-actions">
++            <NotificationBell />
+             <Link className="user-link" to={user ? "/profile" : "/login"}>
+               <UserRound size={18} />
+               <span>{user ? user.name.split(" ")[0] : "Sign in"}</span>
+--- a/frontend/src/pages/MyOrders.jsx
++++ b/frontend/src/pages/MyOrders.jsx
+@@ -18,7 +18,11 @@
+     setData(null);
+     load();
+     const timer = setInterval(load, 30000);
+-    return () => clearInterval(timer);
++    window.addEventListener("amfaye:order-status-updated", load);
++    return () => {
++      clearInterval(timer);
++      window.removeEventListener("amfaye:order-status-updated", load);
++    };
+   }, [id]);
+   return (
+     <div className="container page">
+--- /dev/null
++++ b/backend/models/Notification.js
+@@ -0,0 +1,34 @@
++import mongoose from "mongoose";
++
++const notificationSchema = new mongoose.Schema(
++  {
++    user: { type: mongoose.Schema.Types.ObjectId, ref: "User", required: true },
++    order: {
++      type: mongoose.Schema.Types.ObjectId,
++      ref: "Order",
++      required: true,
++    },
++    orderNumber: { type: String, required: true },
++    status: {
++      type: String,
++      enum: [
++        "Pending",
++        "Confirmed",
++        "Preparing",
++        "Ready for Pickup",
++        "Completed",
++        "Cancelled",
++      ],
++      required: true,
++    },
++    title: { type: String, required: true, maxlength: 100 },
++    message: { type: String, required: true, maxlength: 500 },
++    readAt: { type: Date, default: null },
++  },
++  { timestamps: true },
++);
++notificationSchema.index({ user: 1, createdAt: -1, _id: -1 });
++notificationSchema.index({ user: 1, readAt: 1 });
++// Order transitions never return to a previous status. This also guards against duplicate events.
++notificationSchema.index({ order: 1, status: 1 }, { unique: true });
++export default mongoose.model("Notification", notificationSchema);
+--- /dev/null
++++ b/backend/services/notificationService.js
+@@ -0,0 +1,48 @@
++import Notification from "../models/Notification.js";
++
++const messages = {
++  Pending: [
++    "We've received your order",
++    "Your order is waiting for the team to confirm it.",
++  ],
++  Confirmed: [
++    "Your order is confirmed",
++    "The team has accepted your order. We'll let you know when preparation starts.",
++  ],
++  Preparing: [
++    "A little happiness is in the making",
++    "We're preparing your pastries and shakes. Please wait for the pickup notification.",
++  ],
++  "Ready for Pickup": [
++    "Your order is ready for pickup!",
++    "Your order is ready. You can now collect it from the store.",
++  ],
++  Completed: [
++    "Order completed. Thank you!",
++    "Your order has been marked completed. Thank you for choosing Amfaye Bites.",
++  ],
++  Cancelled: [
++    "Your order was cancelled",
++    "The team has cancelled this order. Open the order to review its details.",
++  ],
++};
++
++// Called inside the SAME MongoDB transaction as order creation/status changes.
++// POS walk-ins are owned by staff and must not generate customer notifications.
++export async function notifyOrderStatus(order, session) {
++  if (order.source !== "web") return;
++  const [title, message] = messages[order.status];
++  await Notification.create(
++    [
++      {
++        user: order.user,
++        order: order._id,
++        orderNumber: order.number,
++        status: order.status,
++        title,
++        message,
++      },
++    ],
++    { session },
++  );
++}
+--- /dev/null
++++ b/backend/routes/notificationRoutes.js
+@@ -0,0 +1,57 @@
++import { Router } from "express";
++import { z } from "zod";
++import Notification from "../models/Notification.js";
++import { auth } from "../middleware/authMiddleware.js";
++import { fail, id, wrap } from "../utils/validators.js";
++
++const router = Router();
++router.use(auth);
++router.use((req, res, next) => {
++  res.set("Cache-Control", "no-store");
++  next();
++});
++router.get(
++  "/",
++  wrap(async (req, res) => {
++    const [items, unreadCount] = await Promise.all([
++      Notification.find({ user: req.user._id })
++        .sort({ createdAt: -1, _id: -1 })
++        .limit(50)
++        .lean(),
++      Notification.countDocuments({ user: req.user._id, readAt: null }),
++    ]);
++    res.json({ items, unreadCount });
++  }),
++);
++router.put(
++  "/read-all",
++  wrap(async (req, res) => {
++    // Mark only up to the newest notification the client actually displayed.
++    // A notification arriving while the menu is open remains unread.
++    const { through } = z
++      .object({ through: z.string().datetime() })
++      .parse(req.body);
++    await Notification.updateMany(
++      {
++        user: req.user._id,
++        readAt: null,
++        createdAt: { $lte: new Date(through) },
++      },
++      { $set: { readAt: new Date() } },
++    );
++    res.json({ message: "Notifications marked as read." });
++  }),
++);
++router.put(
++  "/:id/read",
++  wrap(async (req, res) => {
++    const notification = await Notification.findOneAndUpdate(
++      { _id: id.parse(req.params.id), user: req.user._id },
++      { $set: { readAt: new Date() } },
++      { new: true },
++    );
++    if (!notification) throw fail(404, "Notification not found.");
++    res.json(notification);
++  }),
++);
++export default router;
+--- /dev/null
++++ b/frontend/src/components/NotificationBell.jsx
+@@ -0,0 +1,325 @@
++import { useCallback, useEffect, useRef, useState } from "react";
++import { useNavigate, useLocation } from "react-router-dom";
++import {
++  Bell,
++  BellRing,
++  CheckCheck,
++  RefreshCw,
++  X,
++  ArrowUpRight,
++} from "lucide-react";
++import { useAuth } from "../context/AuthContext";
++import { api } from "../services/api";
++import { date } from "../utils/currency";
++import "./notifications.css";
++
++// Remount on identity changes so one customer's feed never appears for another.
++export default function NotificationBell() {
++  const { user } = useAuth();
++  if (!user || user.role !== "customer") return null;
++  return <CustomerNotifications key={user.id || user._id} />;
++}
++
++function CustomerNotifications() {
++  const navigate = useNavigate();
++  const { pathname } = useLocation();
++  const [open, setOpen] = useState(false);
++  const [items, setItems] = useState([]);
++  const [unreadCount, setUnreadCount] = useState(0);
++  const [loading, setLoading] = useState(true);
++  const [error, setError] = useState("");
++  const [actionError, setActionError] = useState("");
++  const [busy, setBusy] = useState(false);
++  const [toasts, setToasts] = useState([]);
++  const wrapper = useRef(null);
++  const button = useRef(null);
++  const mounted = useRef(false);
++  const controller = useRef(null);
++  const activeRequest = useRef(null);
++  const seen = useRef(new Set());
++  const initialized = useRef(false);
++
++  const refresh = useCallback(() => {
++    if (activeRequest.current) return activeRequest.current;
++    controller.current = new AbortController();
++    const work = api("/notifications", { signal: controller.current.signal })
++      .then((data) => {
++        if (!mounted.current) return;
++        const fresh = initialized.current
++          ? data.items.filter((n) => !seen.current.has(n._id) && !n.readAt)
++          : [];
++        // First load populates the bell, without replaying old popups after login/reload.
++        seen.current = new Set(data.items.map((n) => n._id));
++        initialized.current = true;
++        setItems(data.items);
++        setUnreadCount(data.unreadCount);
++        setError("");
++        if (fresh.length) {
++          setToasts((previous) =>
++            [
++              ...fresh,
++              ...previous.filter((n) => !fresh.some((f) => f._id === n._id)),
++            ].slice(0, 3),
++          );
++          // Refresh the open order/history view too; no status is changed client-side.
++          window.dispatchEvent(new Event("amfaye:order-status-updated"));
++        }
++      })
++      .catch((e) => {
++        if (mounted.current) setError(e.message);
++      })
++      .finally(() => {
++        activeRequest.current = null;
++        if (mounted.current) setLoading(false);
++      });
++    activeRequest.current = work;
++    return work;
++  }, []);
++
++  useEffect(() => {
++    mounted.current = true;
++    refresh();
++    const tick = () => {
++      if (document.visibilityState !== "hidden") refresh();
++    };
++    const interval = setInterval(tick, 10000);
++    window.addEventListener("focus", tick);
++    window.addEventListener("online", tick);
++    document.addEventListener("visibilitychange", tick);
++    return () => {
++      mounted.current = false;
++      controller.current?.abort();
++      clearInterval(interval);
++      window.removeEventListener("focus", tick);
++      window.removeEventListener("online", tick);
++      document.removeEventListener("visibilitychange", tick);
++    };
++  }, [refresh]);
++
++  useEffect(() => {
++    setOpen(false);
++  }, [pathname]);
++  useEffect(() => {
++    if (!open) return;
++    const outside = (e) => {
++      if (!wrapper.current?.contains(e.target)) setOpen(false);
++    };
++    const escape = (e) => {
++      if (e.key === "Escape") {
++        setOpen(false);
++        button.current?.focus();
++      }
++    };
++    document.addEventListener("pointerdown", outside);
++    document.addEventListener("keydown", escape);
++    return () => {
++      document.removeEventListener("pointerdown", outside);
++      document.removeEventListener("keydown", escape);
++    };
++  }, [open]);
++
++  async function viewOrder(notification) {
++    setOpen(false);
++    setToasts((old) => old.filter((n) => n._id !== notification._id));
++    navigate("/orders/" + notification.order);
++    if (!notification.readAt) {
++      setBusy(true);
++      setActionError("");
++      // Finish an in-flight read before mutation to prevent stale badge values.
++      await activeRequest.current;
++      try {
++        await api(`/notifications/${notification._id}/read`, {
++          method: "PUT",
++          body: {},
++        });
++        await refresh();
++      } catch (e) {
++        if (mounted.current)
++          setActionError(
++            "Could not mark the notification as read. " + e.message,
++          );
++      } finally {
++        if (mounted.current) setBusy(false);
++      }
++    }
++  }
++  async function markAll() {
++    if (!items.length) return;
++    setBusy(true);
++    setActionError("");
++    const through = items[0].createdAt;
++    await activeRequest.current;
++    try {
++      await api("/notifications/read-all", {
++        method: "PUT",
++        body: { through },
++      });
++      if (mounted.current)
++        setToasts((old) => old.filter((n) => n.createdAt > through));
++      await refresh();
++    } catch (e) {
++      if (mounted.current) setActionError(e.message);
++    } finally {
++      if (mounted.current) setBusy(false);
++    }
++  }
++
++  return (
++    <>
++      <div className="notification-control" ref={wrapper}>
++        <button
++          className="notification-toggle"
++          ref={button}
++          type="button"
++          aria-label={`Order notifications, ${unreadCount} unread`}
++          aria-expanded={open}
++          aria-controls="order-notification-panel"
++          onClick={() => {
++            setOpen(!open);
++            if (!open) refresh();
++          }}
++        >
++          <Bell size={19} />
++          {unreadCount > 0 && (
++            <span className="notification-count">
++              {unreadCount > 99 ? "99+" : unreadCount}
++            </span>
++          )}
++          {error && (
++            <span
++              className="notification-offline"
++              title="Updates paused. Open notifications to retry."
++            />
++          )}
++        </button>
++        {open && (
++          <section
++            id="order-notification-panel"
++            className="notification-panel"
++            aria-label="Your order notifications"
++          >
++            <div className="notification-heading">
++              <div>
++                <span className="eyebrow">A LITTLE UPDATE FOR YOU</span>
++                <h3>Order notifications</h3>
++              </div>
++              <button
++                className="icon-btn"
++                type="button"
++                onClick={() => setOpen(false)}
++                aria-label="Close notifications"
++              >
++                <X size={18} />
++              </button>
++            </div>
++            <div className="notification-toolbar">
++              <span>{unreadCount} unread</span>
++              <button
++                type="button"
++                disabled={busy || !unreadCount || !items.length}
++                onClick={markAll}
++              >
++                <CheckCheck size={14} />
++                Mark all as read
++              </button>
++              <button
++                type="button"
++                onClick={refresh}
++                aria-label="Refresh notifications"
++              >
++                <RefreshCw size={14} />
++              </button>
++            </div>
++            {(error || actionError) && (
++              <p className="notification-error" role="alert">
++                {actionError ||
++                  `Updates paused: ${error} We'll try again automatically.`}
++              </p>
++            )}
++            <div className="notification-list">
++              {loading ? (
++                <p className="notification-empty">
++                  Checking on your happy little order…
++                </p>
++              ) : !items.length ? (
++                <div className="notification-empty">
++                  <BellRing size={27} />
++                  <b>No updates just yet.</b>
++                  <p>
++                    Place an order and we'll keep you posted, from confirmation
++                    to pickup.
++                  </p>
++                </div>
++              ) : (
++                items.map((n) => (
++                  <button
++                    className={`notification-item ${n.readAt ? "" : "unread"}`}
++                    key={n._id}
++                    type="button"
++                    onClick={() => viewOrder(n)}
++                    disabled={busy}
++                  >
++                    <span
++                      className={`notification-dot ${n.readAt ? "read" : ""}`}
++                    />
++                    <span className="notification-copy">
++                      <strong>{n.title}</strong>
++                      <span className="notification-order-number">
++                        {n.orderNumber} · {n.status}
++                      </span>
++                      <span className="notification-message">{n.message}</span>
++                      <time dateTime={n.createdAt}>{date(n.createdAt)}</time>
++                    </span>
++                    <ArrowUpRight size={15} />
++                  </button>
++                ))
++              )}
++            </div>
++            <div className="notification-footnote">
++              Latest 50 updates · Checks every 10 seconds while this page is
++              visible.
++            </div>
++          </section>
++        )}
++      </div>
++      <div
++        className="order-toast-region"
++        aria-live="polite"
++        aria-relevant="additions"
++        aria-label="New order updates"
++      >
++        {toasts.map((n) => (
++          <article className="order-toast" key={n._id}>
++            <span className="order-toast-icon">
++              <BellRing size={20} />
++            </span>
++            <div>
++              <strong>{n.title}</strong>
++              <span>
++                {n.orderNumber} · {n.status}
++              </span>
++              <p>{n.message}</p>
++              <button
++                type="button"
++                onClick={() => viewOrder(n)}
++                disabled={busy}
++              >
++                View my order <ArrowUpRight size={14} />
++              </button>
++            </div>
++            <button
++              className="icon-btn"
++              type="button"
++              aria-label="Dismiss order notification"
++              onClick={() =>
++                setToasts((old) => old.filter((t) => t._id !== n._id))
++              }
++            >
++              <X size={17} />
++            </button>
++          </article>
++        ))}
++      </div>
++    </>
++  );
++}
+--- /dev/null
++++ b/frontend/src/components/notifications.css
+@@ -0,0 +1,299 @@
++/* Uses existing theme variables; works with the green OR customized brown palette. */
++.notification-control {
++  position: relative;
++  flex-shrink: 0;
++}
++.notification-toggle {
++  position: relative;
++  display: flex;
++  align-items: center;
++  justify-content: center;
++  width: 31px;
++  height: 35px;
++  border: 0;
++  background: transparent;
++  border-radius: 7px;
++  color: var(--ink);
++}
++.notification-toggle:hover {
++  background: var(--light);
++}
++.notification-count {
++  position: absolute;
++  right: -6px;
++  top: -1px;
++  background: var(--green);
++  color: white;
++  min-width: 17px;
++  height: 17px;
++  padding: 0 3px;
++  border-radius: 9px;
++  font-size: 9px;
++  line-height: 17px;
++  font-weight: 700;
++  text-align: center;
++}
++.notification-offline {
++  position: absolute;
++  bottom: 2px;
++  right: 2px;
++  border: 2px solid var(--cream);
++  border-radius: 50%;
++  height: 9px;
++  width: 9px;
++  background: var(--accent);
++}
++.notification-panel {
++  position: absolute;
++  right: -40px;
++  top: 49px;
++  width: 385px;
++  background: var(--cream);
++  border: 1px solid var(--line);
++  border-radius: 13px;
++  box-shadow: 0 16px 45px #30271c26;
++  z-index: 60;
++  overflow: hidden;
++  text-align: left;
++}
++.notification-heading {
++  display: flex;
++  align-items: flex-start;
++  justify-content: space-between;
++  padding: 22px 20px 14px;
++  gap: 12px;
++}
++.notification-heading .eyebrow {
++  font-size: 8px;
++  letter-spacing: 1.3px;
++  margin-bottom: 8px;
++}
++.notification-heading h3 {
++  font-size: 19px;
++  margin: 0;
++}
++.notification-toolbar {
++  display: flex;
++  align-items: center;
++  gap: 12px;
++  padding: 10px 19px;
++  background: var(--light);
++  color: var(--green-dark);
++  font-size: 10px;
++}
++.notification-toolbar > span {
++  margin-right: auto;
++}
++.notification-toolbar button {
++  display: inline-flex;
++  align-items: center;
++  gap: 5px;
++  padding: 4px 0;
++  background: transparent;
++  border: 0;
++  font-size: 10px;
++  color: inherit;
++}
++.notification-list {
++  max-height: min(440px, 55vh);
++  overflow-y: auto;
++  overscroll-behavior: contain;
++}
++.notification-item {
++  width: 100%;
++  display: flex;
++  align-items: flex-start;
++  gap: 11px;
++  border: 0;
++  border-bottom: 1px solid var(--line);
++  background: transparent;
++  padding: 17px 19px;
++  text-align: left;
++  color: var(--ink);
++}
++.notification-item.unread {
++  background: color-mix(in srgb, var(--light) 35%, var(--cream));
++}
++.notification-item:hover {
++  background: var(--light);
++}
++.notification-item > svg {
++  flex-shrink: 0;
++  color: var(--green);
++  margin-top: 4px;
++}
++.notification-dot {
++  width: 7px;
++  height: 7px;
++  margin-top: 5px;
++  border-radius: 50%;
++  background: var(--green);
++  flex-shrink: 0;
++}
++.notification-dot.read {
++  background: transparent;
++}
++.notification-copy {
++  flex: 1;
++  min-width: 0;
++}
++.notification-copy > strong {
++  display: block;
++  font-size: 12px;
++  line-height: 1.6;
++}
++.notification-order-number {
++  display: block;
++  font-size: 10px;
++  color: var(--green-dark);
++  margin-top: 5px;
++  overflow-wrap: anywhere;
++}
++.notification-message {
++  display: block;
++  color: var(--muted);
++  font-size: 11px;
++  line-height: 1.7;
++  margin-top: 7px;
++}
++.notification-copy time {
++  display: block;
++  color: var(--muted);
++  font-size: 9px;
++  margin-top: 8px;
++}
++.notification-empty {
++  padding: 33px 25px;
++  color: var(--muted);
++  text-align: center;
++  font-size: 12px;
++}
++.notification-empty > svg {
++  color: var(--green);
++  margin-bottom: 16px;
++}
++.notification-empty > b {
++  display: block;
++  font-size: 14px;
++  color: var(--ink);
++}
++.notification-empty > p {
++  font-size: 11px;
++  line-height: 1.8;
++  margin: 10px 0 0;
++}
++.notification-footnote {
++  font-size: 9px;
++  line-height: 1.7;
++  color: var(--muted);
++  padding: 12px 17px;
++  border-top: 1px solid var(--line);
++}
++.notification-error {
++  margin: 0;
++  padding: 12px 19px;
++  color: var(--green-dark);
++  background: var(--light);
++  font-size: 11px;
++  overflow-wrap: anywhere;
++}
++.order-toast-region {
++  position: fixed;
++  z-index: 90;
++  bottom: 24px;
++  right: 24px;
++  width: min(390px, calc(100vw - 32px));
++  display: grid;
++  gap: 12px;
++  max-height: calc(100dvh - 100px);
++  overflow: auto;
++}
++.order-toast {
++  display: flex;
++  align-items: flex-start;
++  gap: 13px;
++  padding: 20px 15px 20px 20px;
++  background: var(--cream);
++  border: 1px solid var(--line);
++  border-left: 4px solid var(--green);
++  border-radius: 12px;
++  box-shadow: 0 8px 35px #30271c26;
++}
++.order-toast-icon {
++  color: var(--green);
++  flex-shrink: 0;
++  padding-top: 1px;
++}
++.order-toast > div {
++  flex: 1;
++  min-width: 0;
++}
++.order-toast strong {
++  display: block;
++  font-size: 13px;
++  line-height: 1.6;
++}
++.order-toast div > span {
++  display: block;
++  font-size: 10px;
++  color: var(--green-dark);
++  margin-top: 5px;
++  overflow-wrap: anywhere;
++}
++.order-toast p {
++  font-size: 11px;
++  line-height: 1.8;
++  margin: 8px 0;
++  color: var(--muted);
++}
++.order-toast div > button {
++  border: 0;
++  padding: 3px 0;
++  background: transparent;
++  display: flex;
++  gap: 7px;
++  align-items: center;
++  color: var(--green);
++  font-size: 11px;
++  font-weight: 600;
++}
++.order-toast > .icon-btn {
++  padding: 3px;
++  flex-shrink: 0;
++}
++@media (max-width: 1100px) {
++  .nav-wrap {
++    gap: 16px;
++  }
++  .nav-actions {
++    gap: 11px;
++  }
++}
++@media (max-width: 600px) {
++  .notification-panel {
++    position: fixed;
++    left: 12px;
++    right: 12px;
++    top: 104px;
++    width: auto;
++  }
++  .notification-list {
++    max-height: min(430px, calc(100dvh - 280px));
++  }
++  .nav-actions {
++    gap: 8px;
++  }
++  .notification-toggle {
++    width: 26px;
++  }
++  .order-toast-region {
++    bottom: 16px;
++    right: 16px;
++  }
++}
++@media print {
++  .notification-control,
++  .order-toast-region {
++    display: none !important;
++  }
++}

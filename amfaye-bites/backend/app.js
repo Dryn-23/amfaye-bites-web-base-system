@@ -1,3 +1,4 @@
+import notifications from "./routes/notificationRoutes.js";
 import express from "express";
 import cors from "cors";
 import helmet from "helmet";
@@ -37,15 +38,13 @@ app.use(
   }),
 );
 app.get("/api/health", (req, res) =>
-  res
-    .status(mongoose.connection.readyState === 1 ? 200 : 503)
-    .json({
-      success: mongoose.connection.readyState === 1,
-      message:
-        mongoose.connection.readyState === 1
-          ? "Amfaye Bites API is running"
-          : "Database unavailable",
-    }),
+  res.status(mongoose.connection.readyState === 1 ? 200 : 503).json({
+    success: mongoose.connection.readyState === 1,
+    message:
+      mongoose.connection.readyState === 1
+        ? "Amfaye Bites API is running"
+        : "Database unavailable",
+  }),
 );
 app.use("/api", (req, res, next) =>
   mongoose.connection.readyState === 1
@@ -63,6 +62,7 @@ for (const [path, router] of Object.entries({
   payments,
   users,
   reports,
+  notifications,
 }))
   app.use("/api/" + path, router);
 app.use("/api", extras);

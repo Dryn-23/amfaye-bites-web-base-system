@@ -18,7 +18,11 @@ export default function MyOrders() {
     setData(null);
     load();
     const timer = setInterval(load, 30000);
-    return () => clearInterval(timer);
+    window.addEventListener("amfaye:order-status-updated", load);
+    return () => {
+      clearInterval(timer);
+      window.removeEventListener("amfaye:order-status-updated", load);
+    };
   }, [id]);
   return (
     <div className="container page">
