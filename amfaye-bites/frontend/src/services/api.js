@@ -23,6 +23,9 @@ export async function api(path, options = {}) {
   if (!res.ok)
     throw Object.assign(new Error(data.message || "Something went wrong."), {
       status: res.status,
+      code: data.code,
+      retryAfter: data.retryAfter,
+      blockedUntil: data.blockedUntil,
     });
   return data;
 }

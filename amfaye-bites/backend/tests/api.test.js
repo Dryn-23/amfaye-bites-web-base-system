@@ -20,6 +20,9 @@ const makeOrder = (p, extra = {}) => ({
   ...extra,
 });
 before(async () => {
+  // Existing scenarios exercise business rules, not throttling; dedicated tests below use small limits.
+  process.env.ORDER_ACCOUNT_LIMIT = "1000";
+  process.env.ORDER_IP_LIMIT = "10000";
   process.env.JWT_SECRET = crypto.randomBytes(48).toString("hex");
   process.env.DEMO_PAYMENTS_ENABLED = "true";
   process.env.SEED_ADMIN_EMAIL = "admin@test.local";

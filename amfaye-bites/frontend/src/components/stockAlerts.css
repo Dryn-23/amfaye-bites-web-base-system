@@ -1,0 +1,111 @@
+/* Inherits the existing brown/green theme; does not replace styles.css. */
+.product-stock-panel > .section-heading {
+  align-items: center;
+}
+.product-stock-panel .eyebrow {
+  font-size: 8px;
+  margin-bottom: 8px;
+}
+.stock-summary-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
+  margin-bottom: 16px;
+}
+.stock-summary {
+  display: flex;
+  flex-direction: column;
+  border: 1px solid var(--line);
+  background: var(--cream);
+  border-radius: 9px;
+  padding: 18px;
+}
+.stock-summary:hover {
+  background: var(--light);
+}
+.stock-summary > span {
+  display: flex;
+  gap: 9px;
+  align-items: center;
+  font-size: 12px;
+  color: var(--green-dark);
+}
+.stock-summary > strong {
+  font-size: 30px;
+  margin: 10px 0 4px;
+  color: var(--ink);
+}
+.stock-summary > small {
+  color: var(--muted);
+  font-size: 10px;
+}
+.stock-alert-row {
+  display: flex;
+  gap: 15px;
+  align-items: center;
+  padding: 14px 0;
+  border-bottom: 1px solid var(--line);
+}
+.stock-alert-row > div {
+  flex: 1;
+  min-width: 0;
+}
+.stock-alert-row b {
+  display: block;
+  font-size: 12px;
+}
+.stock-alert-row small {
+  display: block;
+  color: var(--muted);
+  font-size: 10px;
+  margin-top: 5px;
+}
+.stock-alert-row > svg {
+  flex-shrink: 0;
+  color: var(--green);
+}
+.stock-alert-footer {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 15px;
+  flex-wrap: wrap;
+  margin-top: 17px;
+}
+.stock-alert-footer > small {
+  color: var(--muted);
+  font-size: 9px;
+}
+.stock-filter-tabs {
+  margin-bottom: 18px;
+}
+.stock-filter-caption {
+  font-size: 11px;
+  color: var(--muted);
+  margin-bottom: 15px;
+}
+@media (max-width: 600px) {
+  .stock-summary-grid {
+    gap: 10px;
+  }
+  .stock-summary {
+    padding: 13px;
+  }
+  .stock-summary > span {
+    font-size: 10px;
+    gap: 6px;
+  }
+  .stock-summary > small {
+    font-size: 9px;
+  }
+  .stock-alert-row {
+    flex-wrap: wrap;
+    gap: 8px;
+  }
+  .stock-alert-row > div {
+    flex-basis: 100%;
+  }
+  .stock-alert-row > svg {
+    margin-left: auto;
+  }
+}

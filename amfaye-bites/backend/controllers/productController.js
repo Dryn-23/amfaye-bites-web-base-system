@@ -101,3 +101,26 @@ export async function remove(req, res) {
     message: "Product archived. Existing order records are preserved.",
   });
 }
+
+export async function stockAlerts(req, res) {
+  res.set("Cache-Control", "no-store");
+  // Manual disabled/archived products are excluded. Recipe shortages are separate
+  // from the product's sellable-serving level shown here.
+  const items = await Product.find({
+    available: true,
+    $expr: { $lte: ["$stock", "$minimumStock"] },
+  })
+    .select("name stock minimumStock category image price")
+    .populate("category", "name")
+    .sort({ stock: 1, name: 1 })
+    .lean();
+  res.json({
+    lowStockCount: items.filter((p) => p.stock > 0).length,
+    outOfStockCount: items.filter((p) => p.stock <= 0).length,
+    totalAlerts: items.length,
+    items: items.map((p) => ({
+      ...p,
+      stockStatus: p.stock <= 0 ? "Out of stock" : "Low stock",
+    })),
+  });
+}

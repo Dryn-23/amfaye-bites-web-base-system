@@ -1,3 +1,4 @@
+import useOrderCooldown from "../hooks/useOrderCooldown";
 import { useEffect, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { MapPin, ShoppingBag } from "lucide-react";
@@ -10,6 +11,7 @@ import EmptyState from "../components/EmptyState";
 import Loading from "../components/Loading";
 export default function Checkout() {
   const cart = useCart();
+  const cooldown = useOrderCooldown();
   const { user } = useAuth();
   const navigate = useNavigate();
   const [method, setMethod] = useState("Cash");
@@ -28,6 +30,7 @@ export default function Checkout() {
   const offer = promotions.find((p) => p.code === promo.trim().toUpperCase());
   const discount = offer ? Math.round(cart.total * offer.percent) / 100 : 0;
   async function place() {
+    if (busy || cooldown.remaining > 0 || cooldown.checking) return;
     setBusy(true);
     setError("");
     try {
@@ -49,7 +52,7 @@ export default function Checkout() {
       cart.clear();
       navigate("/orders/" + order._id, { state: { justOrdered: true } });
     } catch (e) {
-      setError(e.message);
+      if (!cooldown.applyBlock(e)) setError(e.message);
     } finally {
       setBusy(false);
     }
@@ -159,6 +162,21 @@ export default function Checkout() {
             <span>Total estimate</span>
             <strong>{money(cart.total - discount)}</strong>
           </div>
+          {cooldown.remaining > 0 && (
+            <div className="warning" role="status">
+              <strong>Ordering temporarily blocked</strong>
+              <span>
+                Your account or network has made too many order attempts. Try
+                again in <b>{cooldown.countdown}</b>. You can still browse and
+                view existing orders.
+              </span>
+            </div>
+          )}
+          {cooldown.checkError && (
+            <div className="warning">
+              Could not check ordering availability. {cooldown.checkError}
+            </div>
+          )}
           {error && (
             <div className="error" role="alert">
               {error}
@@ -166,11 +184,22 @@ export default function Checkout() {
           )}
           <button
             className="button full"
-            disabled={busy || (method === "Demo GCash" && !otp)}
+            disabled={
+              busy ||
+              cooldown.checking ||
+              cooldown.remaining > 0 ||
+              (method === "Demo GCash" && !otp)
+            }
             onClick={place}
           >
             <ShoppingBag size={17} />
-            {busy ? "Preparing your order…" : "Place my order"}
+            {cooldown.remaining > 0
+              ? `Try again in ${cooldown.countdown}`
+              : cooldown.checking
+                ? "Checking order availability…"
+                : busy
+                  ? "Preparing your order…"
+                  : "Place my order"}
           </button>
           <small className="muted">
             Final pricing and stock are checked securely at checkout. No real

@@ -1,10 +1,11 @@
 import { Router } from "express";
 import * as c from "../controllers/productController.js";
 import { auth } from "../middleware/authMiddleware.js";
-import { admin } from "../middleware/roleMiddleware.js";
+import { admin, staff } from "../middleware/roleMiddleware.js";
 import { wrap } from "../utils/validators.js";
 const r = Router();
 r.get("/", wrap(c.list));
+r.get("/stock-alerts", auth, staff, wrap(c.stockAlerts));
 r.get("/:id", wrap(c.detail));
 r.post("/", auth, admin, wrap(c.create));
 r.put("/:id", auth, admin, wrap(c.update));

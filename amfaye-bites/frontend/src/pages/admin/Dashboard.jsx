@@ -1,3 +1,4 @@
+import ProductStockAlerts from "../../components/ProductStockAlerts";
 import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import {
@@ -44,6 +45,7 @@ export default function Dashboard() {
         <Loading />
       ) : (
         <>
+          <ProductStockAlerts />
           <div className="stats-grid">
             {[
               [

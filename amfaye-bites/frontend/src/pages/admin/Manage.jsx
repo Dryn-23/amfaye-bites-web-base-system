@@ -1,3 +1,5 @@
+import { useSearchParams } from "react-router-dom";
+import "../../components/stockAlerts.css";
 import { useEffect, useState } from "react";
 import {
   Plus,
@@ -68,6 +70,8 @@ const numeric = ["price", "stock", "minimumStock", "purchaseCost"];
 const bools = ["available", "featured", "customizable"];
 export default function Manage({ kind }) {
   const config = configs[kind];
+  const [params, setParams] = useSearchParams();
+  const stockFilter = params.get("stock") || "all";
   const { user } = useAuth();
   const [rows, setRows] = useState(null);
   const [categories, setCategories] = useState([]);
@@ -90,7 +94,7 @@ export default function Manage({ kind }) {
       .catch((e) => setError(e.message));
   useEffect(() => {
     setRows(null);
-    setQuery("");
+    setQuery(kind === "products" ? params.get("q") || "" : "");
     setError("");
     setMessage("");
     load();
@@ -160,11 +164,22 @@ export default function Manage({ kind }) {
       setMessage("Saved. A little more goodness, ready to go.");
     });
   }
-  const filtered = (rows || []).filter((r) =>
-    (r.name + " " + (r.email || "") + " " + (r.category?.name || ""))
-      .toLowerCase()
-      .includes(query.toLowerCase()),
-  );
+  const stockMatches = (r, filter) => {
+    if (filter === "low")
+      return r.enabled !== false && r.stock > 0 && r.stock <= r.minimumStock;
+    if (filter === "out") return r.enabled !== false && r.stock <= 0;
+    if (filter === "alerts")
+      return r.enabled !== false && r.stock <= r.minimumStock;
+    if (filter === "unavailable") return !r.available;
+    return true;
+  };
+  const filtered = (rows || [])
+    .filter((r) => kind !== "products" || stockMatches(r, stockFilter))
+    .filter((r) =>
+      (r.name + " " + (r.email || "") + " " + (r.category?.name || ""))
+        .toLowerCase()
+        .includes(query.toLowerCase()),
+    );
   return (
     <>
       <div className="admin-heading">
@@ -200,6 +215,42 @@ export default function Manage({ kind }) {
       </div>
       {error && <div className="error">{error}</div>}
       {message && <div className="success">{message}</div>}
+      {kind === "products" && (
+        <>
+          <div
+            className="tabs stock-filter-tabs"
+            aria-label="Product stock filters"
+          >
+            {[
+              ["all", "All products"],
+              ["low", "Low stock"],
+              ["out", "Out of stock"],
+              ["alerts", "All stock alerts"],
+              ["unavailable", "Unavailable"],
+            ].map(([value, label]) => (
+              <button
+                key={value}
+                type="button"
+                className={stockFilter === value ? "active" : ""}
+                onClick={() => {
+                  setParams(value === "all" ? {} : { stock: value });
+                  setQuery("");
+                }}
+              >
+                {label} (
+                {(rows || []).filter((r) => stockMatches(r, value)).length})
+              </button>
+            ))}
+          </div>
+          <p className="stock-filter-caption">
+            Low stock: 1 to the minimum serving level. Out of stock: zero
+            servings. Disabled products are excluded from stock alerts.
+          </p>
+          <button className="button small outline" type="button" onClick={load}>
+            Refresh product stock
+          </button>
+        </>
+      )}
       <div className="search-field admin-search">
         <Search size={17} />
         <input
@@ -220,7 +271,7 @@ export default function Manage({ kind }) {
                     <th>Product</th>
                     <th>Category</th>
                     <th>Price</th>
-                    <th>Stock</th>
+                    <th>Stock / minimum</th>
                     <th>Status</th>
                   </>
                 ) : kind === "inventory" ? (
@@ -262,9 +313,14 @@ export default function Manage({ kind }) {
                       <td>{r.category?.name}</td>
                       <td>{money(r.price)}</td>
                       <td>
-                        {r.stock}
-                        {r.lowStock && (
-                          <small className="warning-text">Low Stock</small>
+                        {r.stock} servings
+                        <small>Minimum: {r.minimumStock}</small>
+                        {r.enabled !== false && r.stock <= r.minimumStock && (
+                          <span
+                            className={`status ${r.stock <= 0 ? "status-Cancelled" : "status-Pending"}`}
+                          >
+                            {r.stock <= 0 ? "Out of stock" : "Low stock"}
+                          </span>
                         )}
                       </td>
                       <td>
