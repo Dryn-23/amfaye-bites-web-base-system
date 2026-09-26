@@ -1,3 +1,4 @@
+import imageRoutes from "./chatImageRoutes.js";
 import { Router } from "express";
 import { z } from "zod";
 import { auth } from "../middleware/authMiddleware.js";
@@ -50,13 +51,11 @@ const writes = wrap(async (req, res, next) => {
       Math.ceil(((bucket + 1) * 60000 - now) / 1000),
     );
     res.set("Retry-After", String(retryAfter));
-    return res
-      .status(429)
-      .json({
-        code: "CHAT_RATE_LIMIT",
-        retryAfter,
-        message: `You're sending chat updates too quickly. Please wait ${retryAfter} seconds.`,
-      });
+    return res.status(429).json({
+      code: "CHAT_RATE_LIMIT",
+      retryAfter,
+      message: `You're sending chat updates too quickly. Please wait ${retryAfter} seconds.`,
+    });
   }
   next();
 });
@@ -184,4 +183,5 @@ r.put(
     );
   }),
 );
+r.use(imageRoutes(writes));
 export default r;

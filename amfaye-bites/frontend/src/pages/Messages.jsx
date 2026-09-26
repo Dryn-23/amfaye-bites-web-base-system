@@ -1,3 +1,7 @@
+import ChatImage, {
+  ImagePicker,
+  sendImageMessage,
+} from "../components/ChatImages";
 import { useEffect, useLayoutEffect, useRef, useState } from "react";
 import { Link, useNavigate, useParams } from "react-router-dom";
 import {
@@ -266,8 +270,8 @@ export default function Messages() {
         )}
       </div>
       <p className="chat-page-note">
-        Text-only support. Never send passwords, PINs, real OTPs or financial
-        credentials. Chat does not change order or payment status.
+        Text and image support. Never send passwords, PINs, real OTPs or
+        financial credentials. Chat does not change order or payment status.
       </p>
     </div>
   );
@@ -281,6 +285,7 @@ function ChatThread({ id, staff, onBack, onRead, onChanged }) {
   const [error, setError] = useState("");
   const [sendError, setSendError] = useState("");
   const [draft, setDraft] = useState("");
+  const [image, setImage] = useState(null);
   const [sending, setSending] = useState(false);
   const [loadingOlder, setLoadingOlder] = useState(false);
   const [changing, setChanging] = useState(false);
@@ -438,16 +443,35 @@ function ChatThread({ id, staff, onBack, onRead, onChanged }) {
   async function send(e) {
     e.preventDefault();
     const text = draft.trim();
-    if (!text || sending || seconds || conversation?.status !== "Open") return;
+    if (
+      (!text && !image) ||
+      sending ||
+      seconds ||
+      conversation?.status !== "Open"
+    )
+      return;
     setSending(true);
     setSendError("");
-    if (!pendingMessage.current || pendingMessage.current.text !== text)
-      pendingMessage.current = { text, clientMessageId: crypto.randomUUID() };
+    if (
+      !pendingMessage.current ||
+      pendingMessage.current.text !== text ||
+      pendingMessage.current.file !== image
+    )
+      pendingMessage.current = {
+        text,
+        clientMessageId: crypto.randomUUID(),
+        file: image,
+      };
     try {
-      const data = await api(`/chats/${id}/messages`, {
-        method: "POST",
-        body: pendingMessage.current,
-      });
+      const data = image
+        ? await sendImageMessage(id, image, pendingMessage.current)
+        : await api(`/chats/${id}/messages`, {
+            method: "POST",
+            body: {
+              text: pendingMessage.current.text,
+              clientMessageId: pendingMessage.current.clientMessageId,
+            },
+          });
       if (!mounted.current) return;
       // Do not advance the polling cursor past unseen concurrent replies. Poll will merge
       // the saved message and any intervening partner messages on its next fetch.
@@ -458,6 +482,7 @@ function ChatThread({ id, staff, onBack, onRead, onChanged }) {
       );
       setMeta(data.conversation);
       setDraft("");
+      setImage(null);
       pendingMessage.current = null;
       followBottom.current = true;
       setNewBelow(false);
@@ -611,7 +636,17 @@ function ChatThread({ id, staff, onBack, onRead, onChanged }) {
                       ? `${m.senderName} · Admin`
                       : m.senderName}
                 </span>
-                <div className="chat-bubble">{m.text}</div>
+                {m.attachment && (
+                  <ChatImage
+                    conversation={id}
+                    message={m}
+                    onReady={() => {
+                      if (followBottom.current && scroll.current)
+                        scroll.current.scrollTop = scroll.current.scrollHeight;
+                    }}
+                  />
+                )}
+                {m.text && <div className="chat-bubble">{m.text}</div>}
                 <span className="chat-message-meta">
                   <time dateTime={m.createdAt}>{date(m.createdAt)}</time>
                   {own && (
@@ -660,7 +695,7 @@ function ChatThread({ id, staff, onBack, onRead, onChanged }) {
       <form className="chat-composer" onSubmit={send}>
         {sendError && (
           <div className="chat-error" role="alert">
-            {sendError} Your unsent text is kept below.
+            {sendError} Your unsent text and selected image are kept below.
           </div>
         )}
         {seconds > 0 && (
@@ -668,6 +703,12 @@ function ChatThread({ id, staff, onBack, onRead, onChanged }) {
             Please wait {seconds}s before sending another chat update.
           </div>
         )}
+        <ImagePicker
+          file={image}
+          onChange={setImage}
+          disabled={closed || sending || !conversation || seconds > 0}
+          onError={setSendError}
+        />
         <label className="chat-input-label" htmlFor={`chat-draft-${id}`}>
           Message {staff ? "customer" : "admin"}
         </label>
@@ -700,7 +741,11 @@ function ChatThread({ id, staff, onBack, onRead, onChanged }) {
             type="submit"
             className="button chat-send"
             disabled={
-              sending || !draft.trim() || closed || !conversation || seconds > 0
+              sending ||
+              (!draft.trim() && !image) ||
+              closed ||
+              !conversation ||
+              seconds > 0
             }
             aria-label="Send message"
           >

@@ -1,3 +1,4 @@
+import { attachImage } from "./chatImageService.js";
 import mongoose from "mongoose";
 import { z } from "zod";
 import { Order, User, AuditLog } from "../models/index.js";
@@ -74,12 +75,14 @@ export const messageInput = z.object({
   text: z
     .string()
     .trim()
-    .min(1, "Please enter a message.")
+
     .max(1000, "Messages may contain up to 1,000 characters."),
   clientMessageId: z.string().min(8).max(100),
 });
-export async function sendMessage(conversationId, body, user) {
+export async function sendMessage(conversationId, body, user, attachment) {
   const data = messageInput.parse(body);
+  if (!data.text && !attachment)
+    throw fail(400, "Enter a message or attach an image.");
   let result;
   await mongoose.connection.transaction(async (session) => {
     const conversation = await ownedConversation(conversationId, user, session);
@@ -89,7 +92,10 @@ export async function sendMessage(conversationId, body, user) {
       clientMessageId: data.clientMessageId,
     }).session(session);
     if (existing) {
-      if (existing.text !== data.text)
+      if (
+        existing.text !== data.text ||
+        existing.attachment?.sha256 !== attachment?.sha256
+      )
         throw fail(
           409,
           "This message retry does not match the original. Send it as a new message.",
@@ -105,8 +111,12 @@ export async function sendMessage(conversationId, body, user) {
         409,
         "This conversation is closed. Reopen it before sending another message.",
       );
+    if (attachment)
+      await attachImage(attachment, conversation._id, user, session);
     conversation.lastSequence += 1;
-    conversation.lastMessage = data.text.slice(0, 180);
+    conversation.lastMessage = (
+      attachment ? "📷 Image" + (data.text ? ": " + data.text : "") : data.text
+    ).slice(0, 180);
     conversation.lastMessageAt = new Date();
     if (user.role === "admin") conversation.customerUnread += 1;
     else conversation.adminUnread += 1;
@@ -119,6 +129,7 @@ export async function sendMessage(conversationId, body, user) {
           senderRole: user.role,
           senderName: user.name,
           text: data.text,
+          ...(attachment ? { attachment } : {}),
           clientMessageId: data.clientMessageId,
         },
       ],

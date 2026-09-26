@@ -18,9 +18,7 @@
     "helmet": "^8.1.0",
     "jsonwebtoken": "^9.0.2",
     "mongoose": "^8.16.1",
-    "zod": "^3.25.67",
-    "multer": "^2.4.0",
-    "sharp": "^0.35.4"
+    "zod": "^3.25.67"
   },
   "devDependencies": {
     "mongodb-memory-server": "^10.1.4",
