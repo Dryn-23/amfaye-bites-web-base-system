@@ -1,4 +1,3 @@
-import PreparationNavLink from "./PreparationNavLink";
 import { ReviewNavLink } from "./ReviewLinks";
 import ChatNavLink from "./ChatNavLink";
 import { NavLink, Link, useNavigate } from "react-router-dom";
@@ -40,7 +39,6 @@ export default function Sidebar() {
       <Logo />
       <span className="sidebar-caption">YOUR BUSINESS, AT A GLANCE</span>
       <nav>
-<PreparationNavLink />
 <ReviewNavLink />
 <ChatNavLink staff />
         {links

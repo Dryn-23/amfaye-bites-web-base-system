@@ -1,4 +1,3 @@
-import preparation from "./routes/preparationRoutes.js";
 import reviews from "./routes/reviewRoutes.js";
 import chats from "./routes/chatRoutes.js";
 import notifications from "./routes/notificationRoutes.js";
@@ -57,7 +56,6 @@ app.use("/api", (req, res, next) =>
         .json({ message: "Database unavailable. Please try again shortly." }),
 );
 for (const [path, router] of Object.entries({
-preparation,
 reviews,
 chats,
   auth,
