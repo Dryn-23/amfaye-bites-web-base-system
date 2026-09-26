@@ -1,0 +1,673 @@
+/* Additive theme: existing styles.css (including custom brown light colors) is unchanged. */
+.appearance-settings {
+  max-width: 900px;
+}
+.appearance-heading {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 18px;
+}
+.appearance-heading .eyebrow {
+  font-size: 8px;
+  margin-bottom: 8px;
+}
+.appearance-heading h3 {
+  margin: 0;
+}
+.appearance-settings > p {
+  margin-top: 15px;
+}
+.appearance-current {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  color: var(--green-dark);
+  background: var(--light);
+  border-radius: 20px;
+  padding: 7px 12px;
+  font-size: 10px;
+  white-space: nowrap;
+}
+.appearance-options {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 16px;
+  border: 0;
+  margin: 20px 0 0;
+  padding: 0;
+}
+.appearance-option {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  margin: 0;
+  padding: 12px;
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  cursor: pointer;
+  background: var(--cream);
+  transition: border-color 0.15s;
+}
+.appearance-option:hover,
+.appearance-option.is-selected {
+  border-color: var(--green);
+}
+.appearance-option.is-selected {
+  box-shadow: 0 0 0 1px var(--green);
+}
+.appearance-option:focus-within {
+  outline: 3px solid var(--accent);
+  outline-offset: 4px;
+}
+.appearance-sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+.appearance-option input {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  margin: 0;
+  padding: 0;
+  opacity: 0;
+  cursor: pointer;
+  z-index: 1;
+}
+.appearance-preview {
+  display: flex;
+  gap: 9px;
+  height: 85px;
+  padding: 10px;
+  border: 1px solid #e4d6c3;
+  border-radius: 6px;
+  background: #fff8ef;
+  overflow: hidden;
+}
+.appearance-mini-sidebar {
+  width: 20%;
+  border-radius: 3px;
+  background: #ead8be;
+}
+.appearance-mini-content {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  gap: 10px;
+}
+.appearance-mini-content > i {
+  width: 65%;
+  height: 8px;
+  border-radius: 2px;
+  background: #b28c5e;
+}
+.appearance-mini-content > span {
+  display: flex;
+  gap: 7px;
+  flex: 1;
+}
+.appearance-mini-content > span > i {
+  flex: 1;
+  border-radius: 4px;
+  border: 1px solid #ddceb9;
+  background: #f2e6d6;
+}
+.preview-dark {
+  background: #191612;
+  border-color: #514331;
+}
+.preview-dark .appearance-mini-sidebar {
+  background: #3b3024;
+}
+.preview-dark .appearance-mini-content > span > i {
+  background: #2b251e;
+  border-color: #514331;
+}
+.preview-system {
+  background: linear-gradient(90deg, #fff8ef 50%, #191612 50%);
+  border-color: #b49b7c;
+}
+.preview-system .appearance-mini-content > span > i:last-child {
+  background: #2b251e;
+  border-color: #514331;
+}
+.appearance-option-label {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  color: var(--ink);
+  font-size: 12px;
+  margin-top: 14px;
+}
+.appearance-check {
+  margin-left: auto;
+  color: var(--green);
+}
+.appearance-option-description {
+  display: block;
+  color: var(--muted);
+  font-size: 10px;
+  line-height: 1.7;
+  font-weight: 400;
+  margin-top: 7px;
+}
+.appearance-settings .appearance-save-note {
+  color: var(--muted);
+  font-size: 10px;
+  line-height: 1.8;
+  margin-bottom: 0;
+}
+@media (max-width: 600px) {
+  .appearance-options {
+    gap: 10px;
+  }
+  .appearance-option {
+    padding: 9px;
+  }
+  .appearance-preview {
+    height: 66px;
+    padding: 7px;
+    gap: 5px;
+  }
+  .appearance-mini-content {
+    gap: 7px;
+  }
+  .appearance-option-description {
+    font-size: 9px;
+  }
+  .appearance-heading {
+    align-items: flex-start;
+    gap: 8px;
+  }
+  .appearance-current {
+    font-size: 9px;
+    padding: 6px 9px;
+  }
+  .appearance-heading .eyebrow {
+    font-size: 7px;
+  }
+}
+@media (max-width: 380px) {
+  .appearance-options {
+    grid-template-columns: 1fr;
+  }
+  .appearance-option {
+    display: grid;
+    grid-template-columns: 85px 1fr;
+    gap: 0 12px;
+  }
+  .appearance-preview {
+    grid-row: span 2;
+  }
+  .appearance-option-label {
+    margin-top: 2px;
+  }
+  .appearance-option-description {
+    margin-top: 4px;
+  }
+}
+
+html[data-theme="dark"] {
+  color-scheme: dark;
+  --cream: #191612;
+  --ink: #f3eae0;
+  --muted: #b9ac9d;
+  --gray: #211c17;
+  --line: #463b30;
+  --light: #342a20;
+  --green: #ddb17f;
+  --green-dark: #f0c797;
+  --accent: #e1b065;
+  --dark-surface: #25201b;
+  --dark-raised: #302820;
+  --dark-input: #1c1814;
+  --dark-button-text: #281b0f;
+  background: var(--cream);
+  color: var(--ink);
+}
+html[data-theme="dark"] body {
+  background: var(--cream);
+  color: var(--ink);
+}
+html[data-theme="dark"]
+  :is(
+    p,
+    small,
+    .muted,
+    .tiny,
+    .menu-meta,
+    .menu-footnote,
+    .loading,
+    .sidebar-caption,
+    .product-category,
+    .product-body p,
+    .cart-item small,
+    .cart-item-details > span,
+    .order-row small,
+    .dashboard-row small,
+    .stat-card small,
+    .stat-card span,
+    .pos-product small,
+    .pos-item small,
+    .sidebar-bottom > a,
+    .staff-info small,
+    .footer-bottom,
+    .footer-top > div > a:not(.logo),
+    .footer-tag,
+    .footer-brand p,
+    .hero-proof div > span,
+    .proof-stars small,
+    .promise-inner small,
+    .floating-note small
+  ) {
+  color: var(--muted);
+}
+html[data-theme="dark"]
+  :is(
+    h1,
+    h2,
+    h3,
+    h4,
+    .product-name,
+    .summary-line.total,
+    .summary-line > b,
+    .summary-line > strong,
+    .dashboard-row b,
+    .table-product b,
+    td > b,
+    .green-panel h2,
+    .footer-note h3
+  ) {
+  color: var(--ink);
+}
+html[data-theme="dark"]
+  :is(
+    .panel,
+    .summary-card,
+    .product-card,
+    .cart-items,
+    .pos-product,
+    .pos-cart,
+    .table-wrap,
+    .stat-card,
+    .editor-modal,
+    .payment-modal,
+    .search-field,
+    .quantity,
+    .demo-message
+  ) {
+  background: var(--dark-surface);
+  border-color: var(--line);
+}
+html[data-theme="dark"]
+  :is(
+    .admin-shell,
+    .auth-art,
+    .green-panel,
+    .promise-strip,
+    footer,
+    .announcement,
+    .category-tile,
+    .shake-tile,
+    .offer-card,
+    .story-icon,
+    .proof-icon,
+    .hero-shape,
+    .fresh-stamp,
+    .cart-link span,
+    .staff-info > span,
+    .empty-icon,
+    .dashboard-row .rank
+  ) {
+  background: var(--gray);
+  border-color: var(--line);
+}
+html[data-theme="dark"]
+  :is(.sidebar, .header, .main-nav.open, .product-modal, .order-detail) {
+  background: var(--cream);
+  border-color: var(--line);
+}
+html[data-theme="dark"]
+  :is(
+    .logo,
+    .logo-mark,
+    .text-link,
+    .eyebrow,
+    .product-bottom > span,
+    .pos-product b,
+    .pos-item strong,
+    .add-btn,
+    .footer-note > a,
+    .proof-stars,
+    .fresh-stamp,
+    .hero-kicker,
+    .story-icon,
+    .promise-inner svg,
+    .stat-card svg,
+    .live-label,
+    .sidebar-bottom .text-button,
+    .stock-summary > span
+  ) {
+  color: var(--green);
+}
+html[data-theme="dark"] .logo-mark {
+  border-color: var(--green);
+}
+html[data-theme="dark"]
+  :is(
+    .header,
+    .sidebar,
+    .footer-note,
+    .footer-bottom,
+    .promise-inner > span,
+    .cart-item,
+    .dashboard-row,
+    .pos-item,
+    .staff-info,
+    .demo-brand,
+    td,
+    .receipt-totals,
+    .order-detail table,
+    .auth-art,
+    .category-tile,
+    .phone-frame
+  ) {
+  border-color: var(--line);
+}
+html[data-theme="dark"] :is(input, textarea, select) {
+  background: var(--dark-input);
+  color: var(--ink);
+  border-color: var(--line);
+}
+html[data-theme="dark"] :is(input, textarea)::placeholder {
+  color: #a29485;
+  opacity: 1;
+}
+html[data-theme="dark"] :is(input, textarea, select):focus {
+  outline-color: var(--accent);
+}
+html[data-theme="dark"] input[readonly] {
+  background: var(--gray);
+  color: var(--muted);
+}
+html[data-theme="dark"] label {
+  color: var(--ink);
+}
+html[data-theme="dark"] :is(.search-field input, .menu-meta select) {
+  background: transparent;
+}
+html[data-theme="dark"] input[type="checkbox"],
+html[data-theme="dark"] input[type="radio"] {
+  accent-color: var(--green);
+}
+html[data-theme="dark"] .button {
+  background: var(--green);
+  border-color: var(--green);
+  color: var(--dark-button-text);
+}
+html[data-theme="dark"] .button:hover:not(:disabled) {
+  background: var(--green-dark);
+  border-color: var(--green-dark);
+  color: var(--dark-button-text);
+}
+html[data-theme="dark"] .button.outline {
+  background: transparent;
+  color: var(--ink);
+  border-color: #79644e;
+}
+html[data-theme="dark"] .button.outline:hover:not(:disabled) {
+  background: var(--light);
+  border-color: var(--green);
+  color: var(--ink);
+}
+html[data-theme="dark"] .button.light {
+  background: #f1d7b5;
+  border-color: #f1d7b5;
+  color: #302014;
+}
+html[data-theme="dark"] :is(.tabs > button, .option-buttons button) {
+  background: var(--dark-surface);
+  color: var(--muted);
+  border-color: var(--line);
+}
+html[data-theme="dark"] .tabs > button.active {
+  background: var(--green);
+  border-color: var(--green);
+  color: var(--dark-button-text);
+}
+html[data-theme="dark"] .option-buttons button.selected {
+  background: var(--light);
+  border-color: var(--green);
+  color: var(--green-dark);
+}
+html[data-theme="dark"]
+  :is(
+    .tabs > button:hover:not(.active),
+    .icon-btn:hover,
+    .sidebar nav a:hover
+  ) {
+  background: var(--dark-raised);
+  color: var(--ink);
+}
+html[data-theme="dark"] :is(.sidebar nav a, .sidebar-bottom > a) {
+  color: var(--muted);
+}
+html[data-theme="dark"]
+  :is(.sidebar nav a.active, .main-nav > a.active, .add-btn) {
+  background: var(--light);
+  color: var(--green);
+  border-color: var(--line);
+}
+html[data-theme="dark"] .add-btn:hover {
+  background: var(--green);
+  color: var(--dark-button-text);
+}
+html[data-theme="dark"] :is(.modal-close, .image-arrow) {
+  background: #29221ef2;
+  color: var(--ink);
+}
+html[data-theme="dark"] .modal-backdrop {
+  background: #080604dc;
+}
+html[data-theme="dark"] th {
+  background: var(--dark-raised);
+  color: #deccba;
+}
+html[data-theme="dark"] td {
+  color: #e0d1c0;
+}
+html[data-theme="dark"] .summary-line {
+  color: var(--muted);
+}
+html[data-theme="dark"] :is(.pos-cart > input, .pos-cart label input) {
+  background: var(--dark-input);
+}
+html[data-theme="dark"] .floating-note {
+  background: var(--dark-raised);
+  border-color: var(--line);
+  color: var(--ink);
+  box-shadow: 0 9px 25px #0004;
+}
+html[data-theme="dark"]
+  :is(.hero-visual > img, .auth-art > img, .category-tile img) {
+  mix-blend-mode: normal;
+}
+html[data-theme="dark"]
+  :is(
+    .category-tile .eyebrow,
+    .category-tile .text-link,
+    .shake-tile .eyebrow,
+    .shake-tile .text-link
+  ) {
+  color: var(--green);
+}
+html[data-theme="dark"] .fresh-stamp {
+  box-shadow: 0 0 0 5px var(--gray);
+  border-color: #b98b5a;
+}
+html[data-theme="dark"] .product-image {
+  background: var(--gray);
+}
+html[data-theme="dark"] .promo-banner {
+  background: #36271c;
+  border: 1px solid #6b513a;
+  color: var(--ink);
+}
+html[data-theme="dark"] .promo-banner p {
+  color: #d3c0ab;
+}
+html[data-theme="dark"] .promo-banner .eyebrow {
+  color: #e6be85;
+}
+html[data-theme="dark"] .promo-star {
+  color: #e6be85;
+}
+html[data-theme="dark"] .promo-code {
+  background: var(--dark-surface);
+  border-color: var(--green);
+  color: var(--green-dark);
+}
+html[data-theme="dark"] .offer-percent {
+  color: #c99a66;
+}
+html[data-theme="dark"]
+  :is(
+    .offer-card small,
+    .addon-list span,
+    .phone-frame small,
+    .auth-art > span:last-child
+  ) {
+  color: var(--muted);
+}
+html[data-theme="dark"] .phone-frame {
+  background: var(--dark-input);
+  border-color: #9e805f;
+}
+html[data-theme="dark"] .phone-notch {
+  background: #9e805f;
+}
+html[data-theme="dark"] .demo-brand {
+  color: var(--green);
+}
+html[data-theme="dark"] .demo-brand > span {
+  background: var(--light);
+  color: var(--green-dark);
+}
+html[data-theme="dark"] .demo-success {
+  color: #b5dfb4;
+}
+html[data-theme="dark"] :is(.success, .status-Completed, .status-Ready) {
+  background: #233628;
+  border-color: #42664b;
+  color: #b9e2b9;
+}
+html[data-theme="dark"]
+  :is(.warning, .demo-warning, .status-Pending, .badge.gold, .nav-new) {
+  background: #3a2d17;
+  border-color: #7b6132;
+  color: #f2d293;
+}
+html[data-theme="dark"] :is(.error, .status-Cancelled) {
+  background: #3b2421;
+  border-color: #875449;
+  color: #ffb8a6;
+}
+html[data-theme="dark"] .status-Confirmed {
+  background: #253140;
+  color: #bbd4f1;
+}
+html[data-theme="dark"] .status-Preparing {
+  background: #33273d;
+  color: #dbc2ec;
+}
+html[data-theme="dark"] :is(.info, .badge) {
+  background: #2b3325;
+  border-color: #526544;
+  color: #cedfbc;
+}
+html[data-theme="dark"] .warning-text {
+  color: #eac684;
+}
+html[data-theme="dark"] .bar-column > div {
+  background: var(--green);
+}
+html[data-theme="dark"] :is(.bar-column small, .bar-column span) {
+  color: var(--muted);
+}
+html[data-theme="dark"] .notification-count {
+  background: var(--green);
+  color: var(--dark-button-text);
+}
+html[data-theme="dark"] :is(.notification-panel, .order-toast) {
+  background: var(--dark-surface);
+  border-color: var(--line);
+}
+html[data-theme="dark"] .notification-item.unread {
+  background: var(--light);
+}
+html[data-theme="dark"] .notification-item:hover {
+  background: var(--dark-raised);
+}
+html[data-theme="dark"] .notification-copy > strong {
+  color: var(--ink);
+}
+html[data-theme="dark"] .notification-item time {
+  color: var(--muted);
+}
+html[data-theme="dark"] .order-toast {
+  border-left-color: var(--green);
+}
+html[data-theme="dark"] .appearance-current {
+  color: var(--green-dark);
+}
+html[data-theme="dark"] .stock-summary {
+  background: var(--gray);
+}
+html[data-theme="dark"] .stock-summary:hover {
+  background: var(--light);
+}
+html[data-theme="dark"] ::selection {
+  background: #c49462;
+  color: #1c130b;
+}
+/* Printing must remain ink-friendly even when the on-screen theme is dark. */
+@media print {
+  .appearance-settings {
+    display: none !important;
+  }
+  html[data-theme="dark"] {
+    color-scheme: light;
+    background: white !important;
+    color: black !important;
+    --cream: white;
+    --ink: black;
+    --muted: #333;
+    --line: #ccc;
+  }
+  html[data-theme="dark"]
+    :is(
+      body,
+      .page,
+      .order-detail,
+      .order-detail table,
+      .order-detail th,
+      .order-detail td
+    ) {
+    background: white !important;
+    color: black !important;
+    box-shadow: none !important;
+  }
+  html[data-theme="dark"]
+    .order-detail
+    :is(h1, h2, h3, h4, p, small, b, strong, span, .summary-line) {
+    color: black !important;
+  }
+}

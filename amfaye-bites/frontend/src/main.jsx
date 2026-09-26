@@ -1,3 +1,4 @@
+import { ThemeProvider } from "./context/ThemeContext";
 import React from "react";
 import { createRoot } from "react-dom/client";
 import { BrowserRouter } from "react-router-dom";
@@ -5,6 +6,7 @@ import { AuthProvider } from "./context/AuthContext";
 import { CartProvider } from "./context/CartContext";
 import App from "./App";
 import "./styles.css";
+import "./theme.css";
 class ErrorBoundary extends React.Component {
   state = { error: false };
   static getDerivedStateFromError() {
@@ -26,12 +28,14 @@ class ErrorBoundary extends React.Component {
 }
 createRoot(document.getElementById("root")).render(
   <ErrorBoundary>
-    <BrowserRouter>
-      <AuthProvider>
-        <CartProvider>
-          <App />
-        </CartProvider>
-      </AuthProvider>
-    </BrowserRouter>
+    <ThemeProvider>
+      <BrowserRouter>
+        <AuthProvider>
+          <CartProvider>
+            <App />
+          </CartProvider>
+        </AuthProvider>
+      </BrowserRouter>
+    </ThemeProvider>
   </ErrorBoundary>,
 );

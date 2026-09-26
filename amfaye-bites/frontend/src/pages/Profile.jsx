@@ -1,3 +1,4 @@
+import AppearanceSettings from "../components/AppearanceSettings";
 import { useState } from "react";
 import { useNavigate, Link } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
@@ -45,6 +46,7 @@ export default function Profile() {
         <h1>Hello, {user.name.split(" ")[0]}.</h1>
         <p>Keep your details fresh.</p>
       </div>
+      <AppearanceSettings />
       {error && <div className="error">{error}</div>}
       {message && <div className="success">{message}</div>}
       <form className="panel" onSubmit={(e) => submit(e, false)}>

@@ -1,3 +1,4 @@
+import AppearanceSettings from "../../components/AppearanceSettings";
 import { useState, useEffect } from "react";
 import { api } from "../../services/api";
 import Loading from "../../components/Loading";
@@ -15,9 +16,10 @@ export default function Settings() {
         <div>
           <span className="eyebrow">THE WAY WE DO THINGS</span>
           <h1>Settings</h1>
-          <p>Business information and system configuration.</p>
+          <p>Appearance, business information and system configuration.</p>
         </div>
       </div>
+      <AppearanceSettings />
       {error ? (
         <div className="error">{error}</div>
       ) : !data ? (
