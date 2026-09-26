@@ -1,4 +1,3 @@
-import { ReviewNavLink } from "./ReviewLinks";
 import ChatNavLink from "./ChatNavLink";
 import { NavLink, Link, useNavigate } from "react-router-dom";
 import {
@@ -39,7 +38,6 @@ export default function Sidebar() {
       <Logo />
       <span className="sidebar-caption">YOUR BUSINESS, AT A GLANCE</span>
       <nav>
-<ReviewNavLink />
 <ChatNavLink staff />
         {links
           .filter(

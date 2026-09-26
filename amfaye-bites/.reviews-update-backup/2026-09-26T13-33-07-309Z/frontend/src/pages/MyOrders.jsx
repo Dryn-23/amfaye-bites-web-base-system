@@ -1,4 +1,3 @@
-import { OrderReviewLinks } from "../components/ReviewLinks";
 import OrderChatButton from "../components/OrderChatButton";
 import { useEffect, useState } from "react";
 import { Link, useParams, useLocation } from "react-router-dom";
@@ -51,7 +50,6 @@ export default function MyOrders() {
             </div>
           )}
           <div className="order-detail panel">
-<OrderReviewLinks order={data} />
 <OrderChatButton order={data} />
             <div className="section-heading">
               <div>

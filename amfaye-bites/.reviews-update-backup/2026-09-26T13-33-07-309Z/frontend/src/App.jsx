@@ -1,5 +1,3 @@
-import ManageReviews from "./pages/admin/Reviews";
-import Reviews from "./pages/Reviews";
 import Messages from "./pages/Messages";
 import { useEffect } from "react";
 import { Routes, Route, Outlet, useLocation, Navigate } from "react-router-dom";
@@ -120,7 +118,6 @@ export default function App() {
           }
         />
         <Route path="messages/:chatId?" element={<ProtectedRoute roles={["customer"]}><Messages /></ProtectedRoute>} />
-<Route path="products/:id/reviews" element={<Reviews />} />
 <Route path="unauthorized" element={<Unauthorized />} />
         <Route path="*" element={<NotFound />} />
       </Route>
@@ -134,7 +131,6 @@ export default function App() {
       >
         <Route index element={<AdminHome />} />
         <Route path="messages/:chatId?" element={<ProtectedRoute roles={["admin"]}><Messages /></ProtectedRoute>} />
-<Route path="reviews" element={<ProtectedRoute roles={["admin"]}><ManageReviews /></ProtectedRoute>} />
 <Route path="pos" element={<POS />} />
         <Route path="orders" element={<Orders />} />
         <Route path="inventory" element={<Inventory />} />

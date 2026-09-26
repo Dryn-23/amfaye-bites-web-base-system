@@ -1,4 +1,3 @@
-import ProductRating from "./ReviewLinks";
 import { Plus, ArrowUpRight } from "lucide-react";
 import { money } from "../utils/currency";
 export default function ProductCard({ product, onSelect }) {
@@ -37,7 +36,6 @@ export default function ProductCard({ product, onSelect }) {
           {product.name}
         </button>
         <p>{product.description}</p>
-<ProductRating product={product._id} />
         <div className="product-bottom">
           <span>
             {money(product.price)}

@@ -1,4 +1,3 @@
-import ProductRating from "./ReviewLinks";
 import { useEffect, useState } from "react";
 import { X, Minus, Plus, ShoppingBag, Check } from "lucide-react";
 import { useCart } from "../context/CartContext";
@@ -60,7 +59,6 @@ export default function ProductModal({ product: p, onClose, onAdd }) {
         <div className="modal-content">
           <span className="eyebrow">{p.category?.name} · Made with love</span>
           <h2 id="product-title">{p.name}</h2>
-<ProductRating product={p._id} />
           <p className="muted">{p.description}</p>
           <h3 className="green">{money(price)}</h3>
           {error && <div className="error">{error}</div>}
