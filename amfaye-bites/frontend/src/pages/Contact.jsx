@@ -35,8 +35,8 @@ export default function Contact() {
       <div className="info">
         <ShieldCheck size={22} />
         <span>
-          This is a school-project prototype. No real payment is processed and
-          no real pickup location is advertised.
+          {/* This is a school-project prototype. No real payment is processed and
+          no real pickup location is advertised. */}
         </span>
       </div>
     </div>

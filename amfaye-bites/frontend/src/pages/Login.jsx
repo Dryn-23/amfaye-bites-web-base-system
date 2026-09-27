@@ -129,7 +129,7 @@ export default function Login({ register = false }) {
           </Link>
         </p>
         <small className="muted">
-          School-project prototype. Demo payments never transfer real money.
+          {/* School-project prototype. Demo payments never transfer real money. */}
         </small>
       </form>
     </div>

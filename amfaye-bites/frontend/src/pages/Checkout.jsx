@@ -85,8 +85,7 @@ export default function Checkout() {
             </p>
             <p className="muted">
               Your order will appear in My Orders. Please wait for “Ready for
-              Pickup” before collecting. This school demo does not operate a
-              physical pickup service.
+              Pickup” before collecting.
             </p>
             <label>
               Anything we should know?
@@ -202,8 +201,7 @@ export default function Checkout() {
                   : "Place my order"}
           </button>
           <small className="muted">
-            Final pricing and stock are checked securely at checkout. No real
-            money is transferred online.
+            Final pricing and stock are checked securely at checkout.
           </small>
         </aside>
       </div>
