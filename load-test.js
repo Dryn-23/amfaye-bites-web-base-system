@@ -35,7 +35,10 @@ export const options = {
 let loggedProblem = false;
 
 function hit(name, path) {
-  const res = http.get(`${BASE_URL}${path}`, { tags: { endpoint: name } });
+  const res = http.get(`${BASE_URL}${path}`, {
+    tags: { endpoint: name },
+    timeout: '10s',
+  });
 
   check(res, {
     [`${name} status is 200`]: (r) => r.status === 200,
@@ -47,16 +50,17 @@ function hit(name, path) {
     serverErrors.add(1);
   }
 
-  if (res.status !== 200 && !loggedProblem) {
-    loggedProblem = true;
-   console.log(
-  `${name.toUpperCase()} FAILED: ${res.status} - ${String(res.body).slice(0, 200)}`
-);
+  if (res.status !== 200) {
+    console.log(
+      `${name.toUpperCase()} FAILED | ` +
+      `status=${res.status} | ` +
+      `duration=${res.timings.duration.toFixed(0)}ms | ` +
+      `body=${String(res.body).slice(0, 500)}`
+    );
   }
 
   return res;
 }
-
 export default function () {
   hit('health', '/api/health');
   hit('products', '/api/products');
