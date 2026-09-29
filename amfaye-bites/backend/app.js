@@ -1,6 +1,7 @@
 import express from "express";
 import cors from "cors";
 import helmet from "helmet";
+import compression from "compression";
 import rateLimit from "express-rate-limit";
 import mongoose from "mongoose";
 
@@ -33,6 +34,7 @@ const apiRateLimit = Number(process.env.API_RATE_LIMIT) || 600;
 app.set("trust proxy", 1);
 app.disable("x-powered-by");
 app.use(helmet());
+app.use(compression());
 
 app.use(
   cors({
