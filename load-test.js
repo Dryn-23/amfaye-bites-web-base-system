@@ -49,7 +49,9 @@ function hit(name, path) {
 
   if (res.status !== 200 && !loggedProblem) {
     loggedProblem = true;
-    console.log(`${name.toUpperCase()} FAILED: ${res.status} - ${res.body}`);
+   console.log(
+  `${name.toUpperCase()} FAILED: ${res.status} - ${String(res.body).slice(0, 200)}`
+);
   }
 
   return res;
