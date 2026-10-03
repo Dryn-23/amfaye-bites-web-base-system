@@ -1,4 +1,5 @@
 import { notifyOrderStatus } from "./notificationService.js";
+import { clearProductsCache } from "../controllers/productController.js";
 import mongoose from "mongoose";
 import crypto from "node:crypto";
 import {
@@ -229,6 +230,7 @@ export async function createOrder(body, user) {
     await notifyOrderStatus(order, session);
     result = order;
   });
+  clearProductsCache();
   return result;
 }
 export async function recordPayment(order, received, session) {
@@ -331,5 +333,6 @@ export async function changeStatus(orderId, status, user) {
     await notifyOrderStatus(order, session);
     result = order;
   });
+  if (status === "Cancelled") clearProductsCache();
   return result;
 }
