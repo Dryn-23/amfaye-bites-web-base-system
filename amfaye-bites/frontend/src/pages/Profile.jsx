@@ -1,6 +1,7 @@
 import AppearanceSettings from "../components/AppearanceSettings";
 import { useState } from "react";
 import { useNavigate, Link } from "react-router-dom";
+import { Eye, EyeOff } from "lucide-react";
 import { useAuth } from "../context/AuthContext";
 import { api } from "../services/api";
 export default function Profile() {
@@ -14,6 +15,11 @@ export default function Profile() {
     currentPassword: "",
     password: "",
     confirmPassword: "",
+  });
+  const [showPasswords, setShowPasswords] = useState({
+    currentPassword: false,
+    password: false,
+    confirmPassword: false,
   });
   const [message, setMessage] = useState("");
   const [error, setError] = useState("");
@@ -83,11 +89,11 @@ export default function Profile() {
           password: "New password",
           confirmPassword: "Confirm new password",
         }).map(([k, label]) => (
-          <label key={k}>
+          <label key={k} style={{ position: "relative" }}>
             {label}
             <input
               required
-              type="password"
+              type={showPasswords[k] ? "text" : "password"}
               minLength={8}
               maxLength={72}
               autoComplete={
@@ -97,7 +103,22 @@ export default function Profile() {
               onChange={(e) =>
                 setPassword({ ...password, [k]: e.target.value })
               }
+              style={{ paddingRight: "45px" }}
             />
+            <button
+              type="button"
+              onClick={() =>
+                setShowPasswords({
+                  ...showPasswords,
+                  [k]: !showPasswords[k],
+                })
+              }
+              className="password-toggle"
+              aria-label={showPasswords[k] ? "Hide password" : "Show password"}
+              tabIndex={-1}
+            >
+              {showPasswords[k] ? <EyeOff size={18} /> : <Eye size={18} />}
+            </button>
           </label>
         ))}
         <button className="button outline" disabled={busy}>

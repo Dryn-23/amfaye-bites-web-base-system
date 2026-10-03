@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
-import { ArrowRight, Leaf } from "lucide-react";
+import { ArrowRight, Leaf, Eye, EyeOff } from "lucide-react";
 import { useAuth } from "../context/AuthContext";
 export default function Login({ register = false }) {
   const [form, setForm] = useState({
@@ -12,36 +12,56 @@ export default function Login({ register = false }) {
     confirmPassword: "",
     login: "",
   });
+  const [showPassword, setShowPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [error, setError] = useState("");
   const [busy, setBusy] = useState(false);
   const { authenticate } = useAuth();
   const location = useLocation();
   const navigate = useNavigate();
-  const field = (key, label, type = "text") => (
-    <label>
-      {label}
-      <input
-        required
-        type={type}
-        value={form[key]}
-        onChange={(e) => setForm({ ...form, [key]: e.target.value })}
-        autoComplete={
-          key === "password"
-            ? register
-              ? "new-password"
-              : "current-password"
-            : key === "login"
-              ? "username"
-              : key === "confirmPassword"
+  const field = (key, label, type = "text") => {
+    const isPassword = key === "password" || key === "confirmPassword";
+    const showState = key === "password" ? showPassword : showConfirmPassword;
+    const setShowState = key === "password" ? setShowPassword : setShowConfirmPassword;
+
+    return (
+      <label style={isPassword ? { position: "relative" } : undefined}>
+        {label}
+        <input
+          required
+          type={isPassword && showState ? "text" : type}
+          value={form[key]}
+          onChange={(e) => setForm({ ...form, [key]: e.target.value })}
+          autoComplete={
+            key === "password"
+              ? register
                 ? "new-password"
-                : key
-        }
-        minLength={key === "password" ? 8 : undefined}
-        maxLength={key.includes("assword") ? 72 : 150}
-        placeholder={key === "phone" ? "09XXXXXXXXX" : label}
-      />
-    </label>
-  );
+                : "current-password"
+              : key === "login"
+                ? "username"
+                : key === "confirmPassword"
+                  ? "new-password"
+                  : key
+          }
+          minLength={key === "password" ? 8 : undefined}
+          maxLength={key.includes("assword") ? 72 : 150}
+          placeholder={key === "phone" ? "09XXXXXXXXX" : label}
+          style={isPassword ? { paddingRight: "45px" } : undefined}
+        />
+        {isPassword && (
+          <button
+            type="button"
+            onClick={() => setShowState(!showState)}
+            className="password-toggle"
+            aria-label={showState ? "Hide password" : "Show password"}
+            tabIndex={-1}
+          >
+            {showState ? <EyeOff size={18} /> : <Eye size={18} />}
+          </button>
+        )}
+      </label>
+    );
+  };
   return (
     <div className="auth-page container">
       <div className="auth-art">

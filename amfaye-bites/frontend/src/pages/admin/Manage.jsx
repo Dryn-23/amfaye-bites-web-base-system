@@ -9,6 +9,8 @@ import {
   X,
   History,
   BookOpen,
+  Eye,
+  EyeOff,
 } from "lucide-react";
 import { api } from "../../services/api";
 import { money, date } from "../../utils/currency";
@@ -87,6 +89,7 @@ export default function Manage({ kind }) {
   const [history, setHistory] = useState(null);
   const [recipe, setRecipe] = useState(null);
   const [ingredients, setIngredients] = useState([]);
+  const [showPassword, setShowPassword] = useState(false);
   const canEdit = user.role === "admin" && kind !== "customers";
   const load = () =>
     api("/" + kind)
@@ -567,38 +570,54 @@ export default function Manage({ kind }) {
                           }
                         />
                       ) : (
-                        <input
-                          required={[
-                            "name",
-                            "unit",
-                            "email",
-                            "username",
-                            "password",
-                            "price",
-                            "stock",
-                          ].includes(k)}
-                          type={
-                            numeric.includes(k)
-                              ? "number"
-                              : k === "expirationDate"
-                                ? "date"
-                                : k === "password"
-                                  ? "password"
-                                  : k === "email"
-                                    ? "email"
-                                    : "text"
-                          }
-                          min={numeric.includes(k) ? 0 : undefined}
-                          step={
-                            k === "stock" && kind === "products" ? 1 : "any"
-                          }
-                          minLength={k === "password" ? 8 : undefined}
-                          maxLength={k === "password" ? 72 : undefined}
-                          value={form[k] ?? ""}
-                          onChange={(e) =>
-                            setForm({ ...form, [k]: e.target.value })
-                          }
-                        />
+                        <div style={{ position: "relative" }}>
+                          <input
+                            required={[
+                              "name",
+                              "unit",
+                              "email",
+                              "username",
+                              "password",
+                              "price",
+                              "stock",
+                            ].includes(k)}
+                            type={
+                              numeric.includes(k)
+                                ? "number"
+                                : k === "expirationDate"
+                                  ? "date"
+                                  : k === "password"
+                                    ? showPassword
+                                      ? "text"
+                                      : "password"
+                                    : k === "email"
+                                      ? "email"
+                                      : "text"
+                            }
+                            min={numeric.includes(k) ? 0 : undefined}
+                            step={
+                              k === "stock" && kind === "products" ? 1 : "any"
+                            }
+                            minLength={k === "password" ? 8 : undefined}
+                            maxLength={k === "password" ? 72 : undefined}
+                            value={form[k] ?? ""}
+                            onChange={(e) =>
+                              setForm({ ...form, [k]: e.target.value })
+                            }
+                            style={k === "password" ? { paddingRight: "45px" } : undefined}
+                          />
+                          {k === "password" && (
+                            <button
+                              type="button"
+                              onClick={() => setShowPassword(!showPassword)}
+                              className="password-toggle"
+                              aria-label={showPassword ? "Hide password" : "Show password"}
+                              tabIndex={-1}
+                            >
+                              {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
+                            </button>
+                          )}
+                        </div>
                       )}
                     </>
                   )}
