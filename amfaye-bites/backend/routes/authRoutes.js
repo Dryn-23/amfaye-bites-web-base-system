@@ -8,6 +8,7 @@ const limit = rateLimit({
   windowMs: 15 * 60 * 1000,
   limit: 40,
   message: { message: "Too many attempts. Try again in 15 minutes." },
+  skip: () => process.env.DISABLE_RATE_LIMIT === "true",
 });
 r.post("/register", limit, wrap(c.register));
 r.post("/login", limit, wrap(c.login));
