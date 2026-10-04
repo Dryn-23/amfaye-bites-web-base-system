@@ -107,7 +107,7 @@ export default function Orders() {
                         <>
                           <Truck size={16} style={{ verticalAlign: "middle", marginRight: "4px" }} />
                           Delivery
-                          <small>{o.deliveryCarrier}</small>
+                          <small>{o.deliveryCarrier || "N/A"}</small>
                         </>
                       ) : (
                         <>
@@ -145,7 +145,7 @@ export default function Orders() {
                       <div className="action-buttons">
                         {(typeof next[o.status] === "function"
                           ? next[o.status](o)
-                          : next[o.status]
+                          : next[o.status] || []
                         ).map((s) => (
                           <button
                             key={s}
