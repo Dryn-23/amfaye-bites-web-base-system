@@ -7,6 +7,7 @@ import { CartProvider } from "./context/CartContext";
 import App from "./App";
 import "./styles.css";
 import "./theme.css";
+import "./animations.css";
 class ErrorBoundary extends React.Component {
   state = { error: false };
   static getDerivedStateFromError() {

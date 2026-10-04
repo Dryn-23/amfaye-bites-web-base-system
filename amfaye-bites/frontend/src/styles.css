@@ -1169,6 +1169,24 @@ footer {
   border-radius: 8px;
 }
 
+/* Low stock indicator */
+.low-stock {
+  position: absolute;
+  bottom: 10px;
+  left: 10px;
+  background: #ff9800;
+  color: white;
+  padding: 4px 10px;
+  border-radius: 4px;
+  font-size: 11px;
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  animation: pulse 2s infinite;
+  z-index: 2;
+}
+
 .loading {
   min-height: 220px;
   display: flex;
