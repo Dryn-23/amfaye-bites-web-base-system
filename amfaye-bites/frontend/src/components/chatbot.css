@@ -170,7 +170,7 @@
 
 .quick-question-btn:hover {
   background: #f0f0f0;
-  border-color: #B28C5E;
+  border-color: #4CAF50;
   transform: translateX(4px);
 }
 
@@ -193,8 +193,8 @@
 
 .chatbot-input input:focus {
   outline: none;
-  border-color: #B28C5E;
-  box-shadow: 0 0 0 3px rgba(178, 140, 94, 0.1);
+  border-color: #4CAF50;
+  box-shadow: 0 0 0 3px rgba(76, 175, 80, 0.1);
 }
 
 .chatbot-input button {
@@ -208,7 +208,7 @@
 }
 
 .chatbot-input button:hover:not(:disabled) {
-  background: #B28C5E;
+  background: #45a049;
   transform: scale(1.05);
 }
 
