@@ -1,5 +1,7 @@
 import express from "express";
-import { authenticate, authorize } from "../middleware/auth.js";
+import { auth } from "../middleware/authMiddleware.js";
+import { admin } from "../middleware/roleMiddleware.js";
+import { wrap } from "../utils/validators.js";
 import {
   getAllFlashSales,
   getActiveFlashSales,
@@ -13,16 +15,16 @@ import {
 const router = express.Router();
 
 // Public routes
-router.get("/active", getActiveFlashSales);
-router.get("/:id", getFlashSale);
+router.get("/active", wrap(getActiveFlashSales));
+router.get("/:id", wrap(getFlashSale));
 
 // Protected routes (require authentication)
-router.get("/:id/eligibility", authenticate, checkFlashSaleEligibility);
+router.get("/:id/eligibility", auth, wrap(checkFlashSaleEligibility));
 
 // Admin routes
-router.get("/", authenticate, authorize("admin"), getAllFlashSales);
-router.post("/", authenticate, authorize("admin"), createFlashSale);
-router.patch("/:id", authenticate, authorize("admin"), updateFlashSale);
-router.delete("/:id", authenticate, authorize("admin"), deleteFlashSale);
+router.get("/", auth, admin, wrap(getAllFlashSales));
+router.post("/", auth, admin, wrap(createFlashSale));
+router.patch("/:id", auth, admin, wrap(updateFlashSale));
+router.delete("/:id", auth, admin, wrap(deleteFlashSale));
 
 export default router;

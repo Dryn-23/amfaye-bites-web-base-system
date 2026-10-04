@@ -1,5 +1,7 @@
 import express from "express";
-import { authenticate, authorize } from "../middleware/auth.js";
+import { auth } from "../middleware/authMiddleware.js";
+import { admin } from "../middleware/roleMiddleware.js";
+import { wrap } from "../utils/validators.js";
 import {
   getAllBundles,
   getActiveBundles,
@@ -13,14 +15,14 @@ import {
 const router = express.Router();
 
 // Public routes
-router.get("/active", getActiveBundles);
-router.get("/:id", getBundle);
-router.get("/:id/availability", checkBundleAvailability);
+router.get("/active", wrap(getActiveBundles));
+router.get("/:id", wrap(getBundle));
+router.get("/:id/availability", wrap(checkBundleAvailability));
 
 // Admin routes
-router.get("/", authenticate, authorize("admin"), getAllBundles);
-router.post("/", authenticate, authorize("admin"), createBundle);
-router.patch("/:id", authenticate, authorize("admin"), updateBundle);
-router.delete("/:id", authenticate, authorize("admin"), deleteBundle);
+router.get("/", auth, admin, wrap(getAllBundles));
+router.post("/", auth, admin, wrap(createBundle));
+router.patch("/:id", auth, admin, wrap(updateBundle));
+router.delete("/:id", auth, admin, wrap(deleteBundle));
 
 export default router;
