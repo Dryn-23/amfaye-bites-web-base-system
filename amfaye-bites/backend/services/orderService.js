@@ -272,7 +272,11 @@ export async function changeStatus(orderId, status, user) {
   await mongoose.connection.transaction(async (session) => {
     const order = await Order.findById(orderId).session(session);
     if (!order) throw fail(404, "Order not found.");
-    const allowed = order.deliveryType === "delivery" ? {
+
+    // Handle old orders without deliveryType field (default to pickup)
+    const isDelivery = order.deliveryType === "delivery";
+
+    const allowed = isDelivery ? {
       Pending: ["Confirmed", "Cancelled"],
       Confirmed: ["Preparing", "Cancelled"],
       Preparing: ["Out for Delivery"],
