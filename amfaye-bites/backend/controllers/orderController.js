@@ -37,17 +37,22 @@ export async function detail(req, res) {
   });
 }
 export async function status(req, res) {
-  const status = z
-    .enum([
-      "Pending",
-      "Confirmed",
-      "Preparing",
-      "Ready for Pickup",
-      "Out for Delivery",
-      "Completed",
-      "Delivered",
-      "Cancelled",
-    ])
-    .parse(req.body.status);
-  res.json(await changeStatus(id.parse(req.params.id), status, req.user));
+  try {
+    const status = z
+      .enum([
+        "Pending",
+        "Confirmed",
+        "Preparing",
+        "Ready for Pickup",
+        "Out for Delivery",
+        "Completed",
+        "Delivered",
+        "Cancelled",
+      ])
+      .parse(req.body.status);
+    res.json(await changeStatus(id.parse(req.params.id), status, req.user));
+  } catch (error) {
+    console.error("Status change error:", error);
+    throw error;
+  }
 }
