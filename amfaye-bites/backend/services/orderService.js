@@ -315,25 +315,30 @@ export async function changeStatus(orderId, status, user) {
             { $inc: { stock: line.quantity } },
             { session },
           );
-        for (const use of order.inventoryUsage) {
-          const i = await Ingredient.findByIdAndUpdate(
-            use.ingredient,
-            { $inc: { stock: use.quantity } },
-            { session, new: true },
-          );
-          await InventoryTransaction.create(
-            [
-              {
-                ingredient: use.ingredient,
-                delta: use.quantity,
-                reason: `Cancelled ${order.number}`,
-                actor: user._id,
-                order: order._id,
-                balance: i.stock,
-              },
-            ],
-            { session },
-          );
+        // Handle old orders without inventoryUsage
+        if (order.inventoryUsage && Array.isArray(order.inventoryUsage)) {
+          for (const use of order.inventoryUsage) {
+            const i = await Ingredient.findByIdAndUpdate(
+              use.ingredient,
+              { $inc: { stock: use.quantity } },
+              { session, new: true },
+            );
+            if (i) {
+              await InventoryTransaction.create(
+                [
+                  {
+                    ingredient: use.ingredient,
+                    delta: use.quantity,
+                    reason: `Cancelled ${order.number}`,
+                    actor: user._id,
+                    order: order._id,
+                    balance: i.stock,
+                  },
+                ],
+                { session },
+              );
+            }
+          }
         }
         await Payment.updateOne(
           { order: order._id },
