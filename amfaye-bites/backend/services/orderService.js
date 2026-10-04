@@ -269,92 +269,104 @@ export async function recordPayment(order, received, session) {
 }
 export async function changeStatus(orderId, status, user) {
   let result;
-  await mongoose.connection.transaction(async (session) => {
-    const order = await Order.findById(orderId).session(session);
-    if (!order) throw fail(404, "Order not found.");
+  try {
+    await mongoose.connection.transaction(async (session) => {
+      const order = await Order.findById(orderId).session(session);
+      if (!order) throw fail(404, "Order not found.");
 
-    // Handle old orders without deliveryType field (default to pickup)
-    const isDelivery = order.deliveryType === "delivery";
+      // Handle old orders without deliveryType field (default to pickup)
+      const isDelivery = order.deliveryType === "delivery";
 
-    const allowed = isDelivery ? {
-      Pending: ["Confirmed", "Cancelled"],
-      Confirmed: ["Preparing", "Cancelled"],
-      Preparing: ["Out for Delivery"],
-      "Out for Delivery": ["Delivered"],
-      Delivered: [],
-      Cancelled: [],
-    } : {
-      Pending: ["Confirmed", "Cancelled"],
-      Confirmed: ["Preparing", "Cancelled"],
-      Preparing: ["Ready for Pickup"],
-      "Ready for Pickup": ["Completed"],
-      Completed: [],
-      Cancelled: [],
-    };
-    if (!allowed[order.status].includes(status))
-      throw fail(409, "This order status transition is not allowed.");
-    if ((status === "Completed" || status === "Delivered") && order.paymentStatus !== "Paid")
-      throw fail(400, "Collect payment before completing the order.");
-    if (status === "Cancelled") {
-      if (order.paymentStatus === "Paid" && order.paymentMethod === "Cash")
-        throw fail(
-          400,
-          "Paid cash orders cannot be cancelled here. A supervised refund is required.",
-        );
-      for (const line of order.items)
-        await Product.updateOne(
-          { _id: line.product },
-          { $inc: { stock: line.quantity } },
-          { session },
-        );
-      for (const use of order.inventoryUsage) {
-        const i = await Ingredient.findByIdAndUpdate(
-          use.ingredient,
-          { $inc: { stock: use.quantity } },
-          { session, new: true },
-        );
-        await InventoryTransaction.create(
-          [
-            {
-              ingredient: use.ingredient,
-              delta: use.quantity,
-              reason: `Cancelled ${order.number}`,
-              actor: user._id,
-              order: order._id,
-              balance: i.stock,
-            },
-          ],
-          { session },
-        );
+      const allowed = isDelivery ? {
+        Pending: ["Confirmed", "Cancelled"],
+        Confirmed: ["Preparing", "Cancelled"],
+        Preparing: ["Out for Delivery"],
+        "Out for Delivery": ["Delivered"],
+        Delivered: [],
+        Cancelled: [],
+      } : {
+        Pending: ["Confirmed", "Cancelled"],
+        Confirmed: ["Preparing", "Cancelled"],
+        Preparing: ["Ready for Pickup"],
+        "Ready for Pickup": ["Completed"],
+        Completed: [],
+        Cancelled: [],
+      };
+
+      // Check if current status exists in allowed object
+      if (!allowed[order.status]) {
+        console.error(`Unknown order status: ${order.status} for order ${orderId}`);
+        throw fail(400, `Invalid order status: ${order.status}`);
       }
-      await Payment.updateOne(
-        { order: order._id },
-        { $set: { status: "Voided" } },
+
+      if (!allowed[order.status].includes(status))
+        throw fail(409, "This order status transition is not allowed.");
+      if ((status === "Completed" || status === "Delivered") && order.paymentStatus !== "Paid")
+        throw fail(400, "Collect payment before completing the order.");
+      if (status === "Cancelled") {
+        if (order.paymentStatus === "Paid" && order.paymentMethod === "Cash")
+          throw fail(
+            400,
+            "Paid cash orders cannot be cancelled here. A supervised refund is required.",
+          );
+        for (const line of order.items)
+          await Product.updateOne(
+            { _id: line.product },
+            { $inc: { stock: line.quantity } },
+            { session },
+          );
+        for (const use of order.inventoryUsage) {
+          const i = await Ingredient.findByIdAndUpdate(
+            use.ingredient,
+            { $inc: { stock: use.quantity } },
+            { session, new: true },
+          );
+          await InventoryTransaction.create(
+            [
+              {
+                ingredient: use.ingredient,
+                delta: use.quantity,
+                reason: `Cancelled ${order.number}`,
+                actor: user._id,
+                order: order._id,
+                balance: i.stock,
+              },
+            ],
+            { session },
+          );
+        }
+        await Payment.updateOne(
+          { order: order._id },
+          { $set: { status: "Voided" } },
+          { session },
+        );
+        await Sale.updateOne(
+          { order: order._id },
+          { $set: { voided: true } },
+          { session },
+        );
+        order.paymentStatus = "Voided";
+      }
+      order.status = status;
+      await order.save({ session });
+      await AuditLog.create(
+        [
+          {
+            actor: user._id,
+            action: `order.${status}`,
+            entity: "Order",
+            entityId: order.id,
+          },
+        ],
         { session },
       );
-      await Sale.updateOne(
-        { order: order._id },
-        { $set: { voided: true } },
-        { session },
-      );
-      order.paymentStatus = "Voided";
-    }
-    order.status = status;
-    await order.save({ session });
-    await AuditLog.create(
-      [
-        {
-          actor: user._id,
-          action: `order.${status}`,
-          entity: "Order",
-          entityId: order.id,
-        },
-      ],
-      { session },
-    );
-    await notifyOrderStatus(order, session);
-    result = order;
-  });
-  if (status === "Cancelled") clearProductsCache();
-  return result;
+      await notifyOrderStatus(order, session);
+      result = order;
+    });
+    if (status === "Cancelled") clearProductsCache();
+    return result;
+  } catch (error) {
+    console.error("changeStatus error:", error);
+    throw error;
+  }
 }
