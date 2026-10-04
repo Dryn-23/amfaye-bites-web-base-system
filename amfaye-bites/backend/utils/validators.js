@@ -25,6 +25,18 @@ export const orderInput = z.object({
   notes: z.string().max(300).default(""),
   customerName: z.string().max(100).optional(),
   idempotencyKey: z.string().min(8).max(100),
+  deliveryType: z.enum(["pickup", "delivery"]).default("pickup"),
+  deliveryAddress: z.object({
+    street: z.string().min(5).max(200),
+    barangay: z.string().min(2).max(100),
+    city: z.string().min(2).max(100),
+    zipCode: z.string().regex(/^\d{4}$/, "Invalid ZIP code"),
+    coordinates: z.object({
+      lat: z.number().min(-90).max(90),
+      lng: z.number().min(-180).max(180)
+    }).optional()
+  }).optional(),
+  deliveryCarrier: z.enum(["Foodpanda", "Grab", "N/A"]).default("N/A"),
 });
 export const productInput = z.object({
   name: z.string().trim().min(2).max(100),

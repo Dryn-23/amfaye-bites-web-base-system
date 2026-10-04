@@ -39,6 +39,18 @@ export const User = model("User", {
 export const CustomerProfile = model("CustomerProfile", {
   user: { ...ref("User", true), unique: true },
   notes: str,
+  savedAddresses: [{
+    label: String,
+    street: String,
+    barangay: String,
+    city: String,
+    zipCode: String,
+    coordinates: {
+      lat: Number,
+      lng: Number
+    },
+    isDefault: { type: Boolean, default: false }
+  }]
 });
 export const Category = model("Category", {
   name: { ...str, required: true, unique: true },
@@ -159,7 +171,9 @@ export const Order = model(
         "Confirmed",
         "Preparing",
         "Ready for Pickup",
+        "Out for Delivery",
         "Completed",
+        "Delivered",
         "Cancelled",
       ],
       default: "Pending",
@@ -167,6 +181,27 @@ export const Order = model(
     subtotal: money,
     discount: nonnegative,
     total: money,
+    deliveryType: {
+      type: String,
+      enum: ["pickup", "delivery"],
+      default: "pickup"
+    },
+    deliveryAddress: {
+      street: String,
+      barangay: String,
+      city: String,
+      zipCode: String,
+      coordinates: {
+        lat: Number,
+        lng: Number
+      }
+    },
+    deliveryCarrier: {
+      type: String,
+      enum: ["Foodpanda", "Grab", "N/A"],
+      default: "N/A"
+    },
+    deliveryFee: nonnegative,
     paymentMethod: {
       type: String,
       enum: ["Cash", "Demo GCash"],

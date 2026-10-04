@@ -128,7 +128,14 @@ export async function createOrder(body, user) {
       if (!promo) throw fail(400, "Promotion code is invalid or expired.");
       discount = round((subtotal * promo.percent) / 100);
     }
-    const total = round(subtotal - discount);
+    let deliveryFee = 0;
+    if (input.deliveryType === "delivery") {
+      if (!input.deliveryAddress) {
+        throw fail(400, "Delivery address is required for delivery orders.");
+      }
+      deliveryFee = 50; // Flat fee for prototype
+    }
+    const total = round(subtotal - discount + deliveryFee);
     let paid = input.paymentMethod === "Demo GCash" || input.source === "pos";
     let received = total;
     if (input.paymentMethod === "Demo GCash") {
@@ -164,6 +171,10 @@ export async function createOrder(body, user) {
           subtotal,
           discount,
           total,
+          deliveryType: input.deliveryType,
+          deliveryAddress: input.deliveryAddress,
+          deliveryCarrier: input.deliveryCarrier,
+          deliveryFee,
           status: input.source === "pos" ? "Completed" : "Pending",
           paymentMethod: input.paymentMethod,
           paymentStatus: paid ? "Paid" : "Pending",
@@ -261,7 +272,14 @@ export async function changeStatus(orderId, status, user) {
   await mongoose.connection.transaction(async (session) => {
     const order = await Order.findById(orderId).session(session);
     if (!order) throw fail(404, "Order not found.");
-    const allowed = {
+    const allowed = order.deliveryType === "delivery" ? {
+      Pending: ["Confirmed", "Cancelled"],
+      Confirmed: ["Preparing", "Cancelled"],
+      Preparing: ["Out for Delivery"],
+      "Out for Delivery": ["Delivered"],
+      Delivered: [],
+      Cancelled: [],
+    } : {
       Pending: ["Confirmed", "Cancelled"],
       Confirmed: ["Preparing", "Cancelled"],
       Preparing: ["Ready for Pickup"],
@@ -271,7 +289,7 @@ export async function changeStatus(orderId, status, user) {
     };
     if (!allowed[order.status].includes(status))
       throw fail(409, "This order status transition is not allowed.");
-    if (status === "Completed" && order.paymentStatus !== "Paid")
+    if ((status === "Completed" || status === "Delivered") && order.paymentStatus !== "Paid")
       throw fail(400, "Collect payment before completing the order.");
     if (status === "Cancelled") {
       if (order.paymentStatus === "Paid" && order.paymentMethod === "Cash")

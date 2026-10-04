@@ -14,7 +14,9 @@ export async function list(req, res) {
         "Confirmed",
         "Preparing",
         "Ready for Pickup",
+        "Out for Delivery",
         "Completed",
+        "Delivered",
         "Cancelled",
       ])
       .parse(req.query.status);
@@ -41,7 +43,9 @@ export async function status(req, res) {
       "Confirmed",
       "Preparing",
       "Ready for Pickup",
+      "Out for Delivery",
       "Completed",
+      "Delivered",
       "Cancelled",
     ])
     .parse(req.body.status);
