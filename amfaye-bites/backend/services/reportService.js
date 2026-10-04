@@ -76,3 +76,87 @@ export async function products(query) {
 export async function inventory() {
   return Ingredient.find({ $expr: { $lte: ["$stock", "$minimumStock"] } });
 }
+export async function categoryPerformance(query) {
+  return Order.aggregate([
+    {
+      $match: {
+        paymentStatus: "Paid",
+        status: { $ne: "Cancelled" },
+        ...dates(query),
+      },
+    },
+    { $unwind: "$items" },
+    {
+      $group: {
+        _id: "$items.category",
+        category: { $first: "$items.category" },
+        quantity: { $sum: "$items.quantity" },
+        revenue: { $sum: "$items.subtotal" },
+      },
+    },
+    { $sort: { revenue: -1 } },
+  ]);
+}
+export async function peakHours(query) {
+  return Order.aggregate([
+    {
+      $match: {
+        paymentStatus: "Paid",
+        status: { $ne: "Cancelled" },
+        ...dates(query),
+      },
+    },
+    {
+      $group: {
+        _id: {
+          $hour: { date: "$createdAt", timezone: "Asia/Manila" },
+        },
+        count: { $sum: 1 },
+        revenue: { $sum: "$total" },
+      },
+    },
+    { $sort: { _id: 1 } },
+  ]);
+}
+export async function paymentMethods(query) {
+  return Order.aggregate([
+    {
+      $match: {
+        paymentStatus: "Paid",
+        status: { $ne: "Cancelled" },
+        ...dates(query),
+      },
+    },
+    {
+      $group: {
+        _id: "$paymentMethod",
+        count: { $sum: 1 },
+        revenue: { $sum: "$total" },
+      },
+    },
+    { $sort: { revenue: -1 } },
+  ]);
+}
+export async function monthlyComparison() {
+  const now = new Date();
+  const startOfYear = new Date(now.getFullYear(), 0, 1);
+
+  return Sale.aggregate([
+    {
+      $match: {
+        voided: false,
+        createdAt: { $gte: startOfYear },
+      },
+    },
+    {
+      $group: {
+        _id: {
+          $month: { date: "$createdAt", timezone: "Asia/Manila" },
+        },
+        revenue: { $sum: "$amount" },
+        count: { $sum: 1 },
+      },
+    },
+    { $sort: { _id: 1 } },
+  ]);
+}

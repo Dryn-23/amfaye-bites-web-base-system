@@ -12,6 +12,7 @@ import {
   Warehouse,
   ChartNoAxesCombined,
   FileChartColumn,
+  BarChart3,
   UserCog,
   Settings,
   LogOut,
@@ -29,6 +30,7 @@ const links = [
   ["inventory", "Inventory", Warehouse],
   ["sales", "Sales", ChartNoAxesCombined],
   ["reports", "Reports", FileChartColumn],
+  ["analytics", "Analytics", BarChart3],
   ["users", "Users", UserCog],
   ["settings", "Settings", Settings],
 ];

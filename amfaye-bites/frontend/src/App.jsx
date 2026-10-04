@@ -31,6 +31,7 @@ import Inventory from "./pages/admin/Inventory";
 import Customers from "./pages/admin/Customers";
 import Sales from "./pages/admin/Sales";
 import Reports from "./pages/admin/Reports";
+import Analytics from "./pages/admin/Analytics";
 import Users from "./pages/admin/Users";
 import Settings from "./pages/admin/Settings";
 import { useAuth } from "./context/AuthContext";
@@ -146,6 +147,7 @@ export default function App() {
           ["customers", Customers],
           ["sales", Sales],
           ["reports", Reports],
+          ["analytics", Analytics],
           ["users", Users],
           ["settings", Settings],
         ].map(([path, Page]) => (

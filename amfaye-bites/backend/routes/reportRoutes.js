@@ -5,7 +5,15 @@ import { admin } from "../middleware/roleMiddleware.js";
 import { wrap } from "../utils/validators.js";
 const r = Router();
 r.use(auth, admin);
-for (const name of ["sales", "products", "inventory"])
+for (const name of [
+  "sales",
+  "products",
+  "inventory",
+  "categoryPerformance",
+  "peakHours",
+  "paymentMethods",
+  "monthlyComparison",
+])
   r.get(
     "/" + name,
     wrap(async (req, res) => res.json(await s[name](req.query))),
