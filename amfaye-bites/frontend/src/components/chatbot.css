@@ -134,7 +134,7 @@
 
 .chat-message.user .message-bubble {
   background: #B28C5E;
-  color: white;
+  color: rgb(0, 0, 0);
 }
 
 .message-bubble p {
