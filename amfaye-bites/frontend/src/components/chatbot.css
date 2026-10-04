@@ -6,11 +6,11 @@
   width: 60px;
   height: 60px;
   border-radius: 50%;
-  background: linear-gradient(135deg, #4CAF50 0%, #45a049 100%);
+  background: linear-gradient(#B28C5E);
   color: white;
   border: none;
   cursor: pointer;
-  box-shadow: 0 4px 20px rgba(76, 175, 80, 0.4);
+  box-shadow: 0 4px 20px rgba(178, 140, 94, 0.4);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -21,7 +21,7 @@
 
 .chatbot-button:hover {
   transform: scale(1.1);
-  box-shadow: 0 6px 24px rgba(76, 175, 80, 0.5);
+  box-shadow: 0 6px 24px rgba(178, 140, 94, 0.5);
 }
 
 .chatbot-badge {
@@ -60,7 +60,7 @@
 }
 
 .chatbot-header {
-  background: linear-gradient(135deg, #4CAF50 0%, #45a049 100%);
+  background: linear-gradient(#B28C5E);
   color: white;
   padding: 1rem;
   display: flex;
@@ -116,7 +116,7 @@
   width: 32px;
   height: 32px;
   border-radius: 50%;
-  background: #4CAF50;
+  background: #B28C5E;
   color: white;
   display: flex;
   align-items: center;
@@ -133,7 +133,7 @@
 }
 
 .chat-message.user .message-bubble {
-  background: #4CAF50;
+  background: #B28C5E;
   color: white;
 }
 
@@ -199,7 +199,7 @@
 
 .chatbot-input button {
   padding: 0.75rem 1rem;
-  background: #4CAF50;
+  background: #B28C5E;
   color: white;
   border: none;
   border-radius: 8px;
