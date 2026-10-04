@@ -1,5 +1,6 @@
 import { OrderReviewLinks } from "../components/ReviewLinks";
 import OrderChatButton from "../components/OrderChatButton";
+import DeliveryTracker from "../components/DeliveryTracker";
 import { useEffect, useState } from "react";
 import { Link, useParams, useLocation } from "react-router-dom";
 import { ArrowUpRight, Printer, CheckCircle2, RefreshCw } from "lucide-react";
@@ -50,6 +51,11 @@ export default function MyOrders() {
               Order received! We can't wait to make your day a little sweeter.
             </div>
           )}
+
+          {data.deliveryType === "delivery" && (
+            <DeliveryTracker order={data} />
+          )}
+
           <div className="order-detail panel">
 <OrderReviewLinks order={data} />
 <OrderChatButton order={data} />
@@ -122,6 +128,12 @@ export default function MyOrders() {
                 <span>Payment status</span>
                 <b>{data.paymentStatus}</b>
               </div>
+              {data.deliveryType === "delivery" && (
+                <div className="summary-line">
+                  <span>Delivery Fee</span><script></script>
+                  <b>{money(data.deliveryFee || 0)}</b>
+                </div>
+              )}
               {data.payment && (
                 <>
                   <div className="summary-line">

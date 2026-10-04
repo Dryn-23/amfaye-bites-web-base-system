@@ -1,14 +1,17 @@
 import { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
+import { Truck, MapPin } from "lucide-react";
 import { api } from "../../services/api";
 import { money, date } from "../../utils/currency";
 import Loading from "../../components/Loading";
 const next = {
   Pending: ["Confirmed", "Cancelled"],
   Confirmed: ["Preparing", "Cancelled"],
-  Preparing: ["Ready for Pickup"],
+  Preparing: (o) => o.deliveryType === "delivery" ? ["Out for Delivery"] : ["Ready for Pickup"],
   "Ready for Pickup": ["Completed"],
+  "Out for Delivery": ["Delivered"],
   Completed: [],
+  Delivered: [],
   Cancelled: [],
 };
 export default function Orders() {
@@ -57,7 +60,9 @@ export default function Orders() {
           "Confirmed",
           "Preparing",
           "Ready for Pickup",
+          "Out for Delivery",
           "Completed",
+          "Delivered",
           "Cancelled",
         ].map((s) => (
           <button
@@ -78,6 +83,7 @@ export default function Orders() {
             <thead>
               <tr>
                 <th>Order / customer</th>
+                <th>Type</th>
                 <th>Placed</th>
                 <th>Total</th>
                 <th>Payment</th>
@@ -95,6 +101,20 @@ export default function Orders() {
                         {o.number}
                       </Link>
                       <small>{o.customerName}</small>
+                    </td>
+                    <td>
+                      {o.deliveryType === "delivery" ? (
+                        <>
+                          <Truck size={16} style={{ verticalAlign: "middle", marginRight: "4px" }} />
+                          Delivery
+                          <small>{o.deliveryCarrier}</small>
+                        </>
+                      ) : (
+                        <>
+                          <MapPin size={16} style={{ verticalAlign: "middle", marginRight: "4px" }} />
+                          Pickup
+                        </>
+                      )}
                     </td>
                     <td>{date(o.createdAt)}</td>
                     <td>{money(o.total)}</td>
@@ -123,7 +143,10 @@ export default function Orders() {
                     </td>
                     <td>
                       <div className="action-buttons">
-                        {next[o.status].map((s) => (
+                        {(typeof next[o.status] === "function"
+                          ? next[o.status](o)
+                          : next[o.status]
+                        ).map((s) => (
                           <button
                             key={s}
                             disabled={busy}

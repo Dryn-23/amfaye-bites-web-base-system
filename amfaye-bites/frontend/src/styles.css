@@ -1073,6 +1073,102 @@ footer {
 .empty.compact p {
   font-size: 11px;
 }
+
+/* Delivery Tracker */
+.delivery-tracker {
+  margin: 2rem 0;
+  border-radius: 8px;
+  overflow: hidden;
+  border: 1px solid var(--border);
+  background: var(--surface);
+}
+
+.tracker-header {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  padding: 1.5rem;
+  background: var(--surface);
+}
+
+.carrier-badge {
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.eta-badge {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.5rem 1rem;
+  background: var(--primary);
+  color: white;
+  border-radius: 20px;
+  font-weight: 600;
+  font-size: 0.9rem;
+}
+
+.map-container {
+  position: relative;
+}
+
+.progress-bar {
+  height: 6px;
+  background: var(--border);
+  position: relative;
+}
+
+.progress-fill {
+  height: 100%;
+  background: var(--primary);
+  transition: width 0.3s ease;
+}
+
+.delivery-info {
+  padding: 1.5rem;
+  border-top: 1px solid var(--border);
+}
+
+.info-row {
+  display: flex;
+  gap: 1rem;
+  align-items: flex-start;
+}
+
+.info-row svg {
+  flex-shrink: 0;
+  margin-top: 0.25rem;
+  color: var(--muted);
+}
+
+.info-row p {
+  margin: 0.25rem 0 0 0;
+}
+
+.option-buttons button svg {
+  margin-right: 0.5rem;
+  vertical-align: middle;
+}
+
+/* Leaflet map fixes */
+.leaflet-container {
+  font-family: inherit;
+}
+
+.leaflet-popup-content {
+  margin: 10px 12px;
+  line-height: 1.4;
+}
+
+.leaflet-popup-content-wrapper {
+  border-radius: 8px;
+}
+
 .loading {
   min-height: 220px;
   display: flex;

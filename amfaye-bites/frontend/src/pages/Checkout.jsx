@@ -1,7 +1,7 @@
-import useOrderCooldown from "../hooks/useOrderCooldown";
 import { useEffect, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { MapPin, ShoppingBag } from "lucide-react";
+import { MapPin, ShoppingBag, Truck } from "lucide-react";
+import useOrderCooldown from "../hooks/useOrderCooldown";
 import { useCart } from "../context/CartContext";
 import { useAuth } from "../context/AuthContext";
 import { api } from "../services/api";
@@ -9,11 +9,25 @@ import { money } from "../utils/currency";
 import DemoPayment from "../components/DemoPayment";
 import EmptyState from "../components/EmptyState";
 import Loading from "../components/Loading";
+
+const DELIVERY_FEE = 50;
+const PAYMENT_METHODS = ["Cash", "Demo GCash"];
+const EMPTY_ADDRESS = { street: "", barangay: "", city: "", zipCode: "" };
+
+function validateAddress(address) {
+  if (!address.street.trim()) return "Enter your street address.";
+  if (!address.barangay.trim()) return "Enter your barangay.";
+  if (!address.city.trim()) return "Enter your city.";
+  if (!/^\d{4}$/.test(address.zipCode)) return "Enter a 4-digit ZIP code.";
+  return "";
+}
+
 export default function Checkout() {
   const cart = useCart();
   const cooldown = useOrderCooldown();
   const { user } = useAuth();
   const navigate = useNavigate();
+
   const [method, setMethod] = useState("Cash");
   const [otp, setOtp] = useState(null);
   const [notes, setNotes] = useState("");
@@ -21,16 +35,43 @@ export default function Checkout() {
   const [promotions, setPromotions] = useState([]);
   const [error, setError] = useState("");
   const [busy, setBusy] = useState(false);
-  const key = useRef(crypto.randomUUID());
+  const [deliveryType, setDeliveryType] = useState("pickup");
+  const [address, setAddress] = useState(EMPTY_ADDRESS);
+  const [carrier, setCarrier] = useState("Foodpanda");
+
+  // Lazy init so randomUUID() runs once, not on every render.
+  const keyRef = useRef(null);
+  if (keyRef.current === null) keyRef.current = crypto.randomUUID();
+
   useEffect(() => {
     api("/promotions")
       .then(setPromotions)
       .catch(() => {});
   }, []);
+
+  const isDelivery = deliveryType === "delivery";
   const offer = promotions.find((p) => p.code === promo.trim().toUpperCase());
   const discount = offer ? Math.round(cart.total * offer.percent) / 100 : 0;
+  const deliveryFee = isDelivery ? DELIVERY_FEE : 0;
+  const total = cart.total - discount + deliveryFee;
+
+  const blocked = cooldown.remaining > 0 || cooldown.checking;
+  const needsOtp = method === "Demo GCash" && !otp;
+
+  const updateAddress = (field) => (e) =>
+    setAddress((prev) => ({ ...prev, [field]: e.target.value }));
+
   async function place() {
-    if (busy || cooldown.remaining > 0 || cooldown.checking) return;
+    if (busy || blocked) return;
+
+    if (isDelivery) {
+      const problem = validateAddress(address);
+      if (problem) {
+        setError(problem);
+        return;
+      }
+    }
+
     setBusy(true);
     setError("");
     try {
@@ -46,24 +87,48 @@ export default function Checkout() {
           otpSession: method === "Demo GCash" ? otp : undefined,
           promoCode: promo || undefined,
           notes,
-          idempotencyKey: key.current,
+          deliveryType,
+          deliveryAddress: isDelivery ? address : undefined,
+          deliveryCarrier: isDelivery ? carrier : "N/A",
+          idempotencyKey: keyRef.current,
         },
       });
       cart.clear();
       navigate("/orders/" + order._id, { state: { justOrdered: true } });
     } catch (e) {
-      if (!cooldown.applyBlock(e)) setError(e.message);
+      if (!cooldown.applyBlock(e)) {
+        setError(e.message);
+        // The server rejected the order (stock, promo, validation, etc.), so
+        // a retry with a changed cart is a new attempt and needs a new key.
+        // Network failures keep the key so a retry can't create a duplicate.
+        if (e?.status >= 400 && e.status < 500) {
+          keyRef.current = crypto.randomUUID();
+        }
+      }
     } finally {
       setBusy(false);
     }
   }
+
   if (cart.loading) return <Loading />;
-  if (!cart.items.length)
+
+  if (!cart.items.length) {
     return (
       <div className="page container">
         <EmptyState />
       </div>
     );
+  }
+
+  const buttonLabel =
+    cooldown.remaining > 0
+      ? `Try again in ${cooldown.countdown}`
+      : cooldown.checking
+        ? "Checking order availability…"
+        : busy
+          ? "Preparing your order…"
+          : "Place my order";
+
   return (
     <div className="container page">
       <div className="page-heading">
@@ -73,35 +138,141 @@ export default function Checkout() {
           Review your order, choose a payment method, and we'll do the rest.
         </p>
       </div>
+
       <div className="checkout-layout">
         <div className="checkout-main">
           <section className="panel">
-            <h3>
-              <MapPin size={20} />
-              Pickup order
-            </h3>
-            <p>
-              For <b>{user.name}</b> · {user.phone}
-            </p>
-            <p className="muted">
-              Your order will appear in My Orders. Please wait for “Ready for
-              Pickup” before collecting.
-            </p>
-            <label>
-              Anything we should know?
-              <textarea
-                maxLength={300}
-                value={notes}
-                onChange={(e) => setNotes(e.target.value)}
-                placeholder="Special requests (subject to availability)…"
-              />
-            </label>
+            <h3>Delivery Method</h3>
+            <div className="option-buttons">
+              <button
+                type="button"
+                className={!isDelivery ? "selected" : ""}
+                onClick={() => setDeliveryType("pickup")}
+              >
+                <MapPin size={20} />
+                Pickup
+              </button>
+              <button
+                type="button"
+                className={isDelivery ? "selected" : ""}
+                onClick={() => setDeliveryType("delivery")}
+              >
+                <Truck size={20} />
+                Delivery
+              </button>
+            </div>
+
+            {!isDelivery ? (
+              <>
+                <div className="info">
+                  <p>
+                    For <b>{user.name}</b> · {user.phone}
+                  </p>
+                  <p className="muted">
+                    Your order will appear in My Orders. Please wait for "Ready
+                    for Pickup" before collecting.
+                  </p>
+                </div>
+                <label>
+                  Anything we should know?
+                  <textarea
+                    maxLength={300}
+                    value={notes}
+                    onChange={(e) => setNotes(e.target.value)}
+                    placeholder="Special requests (subject to availability)…"
+                  />
+                </label>
+              </>
+            ) : (
+              <>
+                <div className="info">
+                  Delivery via <b>{carrier}</b> · Flat rate: {money(DELIVERY_FEE)}
+                  <br />
+                  <small className="muted">
+                    For <b>{user.name}</b> · {user.phone}
+                  </small>
+                </div>
+
+                <label>
+                  Delivery Carrier (Demo)
+                  <select
+                    value={carrier}
+                    onChange={(e) => setCarrier(e.target.value)}
+                  >
+                    <option>Foodpanda</option>
+                    <option>Grab</option>
+                  </select>
+                </label>
+
+                <label>
+                  Street Address *
+                  <input
+                    value={address.street}
+                    onChange={updateAddress("street")}
+                    placeholder="123 Main St, Bldg 4, Unit 5"
+                  />
+                </label>
+
+                <div
+                  style={{
+                    display: "grid",
+                    gridTemplateColumns: "1fr 1fr",
+                    gap: "1rem",
+                  }}
+                >
+                  <label>
+                    Barangay *
+                    <input
+                      value={address.barangay}
+                      onChange={updateAddress("barangay")}
+                      placeholder="Barangay Name"
+                    />
+                  </label>
+                  <label>
+                    City *
+                    <input
+                      value={address.city}
+                      onChange={updateAddress("city")}
+                      placeholder="City"
+                    />
+                  </label>
+                </div>
+
+                <label>
+                  ZIP Code *
+                  <input
+                    inputMode="numeric"
+                    maxLength={4}
+                    value={address.zipCode}
+                    onChange={(e) =>
+                      setAddress((prev) => ({
+                        ...prev,
+                        zipCode: e.target.value.replace(/\D/g, ""),
+                      }))
+                    }
+                    placeholder="1234"
+                  />
+                </label>
+
+                <label>
+                  Delivery notes
+                  <textarea
+                    maxLength={300}
+                    value={notes}
+                    onChange={(e) => setNotes(e.target.value)}
+                    placeholder="Landmarks, delivery instructions…"
+                  />
+                </label>
+              </>
+            )}
           </section>
+
           <section className="panel">
             <h3>How would you like to pay?</h3>
             <div className="option-buttons">
-              {["Cash", "Demo GCash"].map((m) => (
+              {PAYMENT_METHODS.map((m) => (
                 <button
+                  type="button"
                   key={m}
                   className={method === m ? "selected" : ""}
                   onClick={() => setMethod(m)}
@@ -112,14 +283,16 @@ export default function Checkout() {
             </div>
             {method === "Cash" ? (
               <div className="info">
-                Pay cash at pickup. A staff member will record the amount
-                received and issue your receipt.
+                {isDelivery
+                  ? "Pay cash when your order arrives. The rider will collect the amount due."
+                  : "Pay cash at pickup. A staff member will record the amount received and issue your receipt."}
               </div>
             ) : (
               <DemoPayment onVerified={setOtp} />
             )}
           </section>
         </div>
+
         <aside className="summary-card">
           <h3>Your happy little order</h3>
           {cart.items.map((i) => (
@@ -131,6 +304,7 @@ export default function Checkout() {
               <b>{money(i.unitPrice * i.quantity)}</b>
             </div>
           ))}
+
           <label>
             Sweet deal code
             <input
@@ -147,6 +321,7 @@ export default function Checkout() {
                 : "Code will be validated when you place your order."}
             </small>
           )}
+
           <div className="summary-line">
             <span>Subtotal</span>
             <span>{money(cart.total)}</span>
@@ -157,10 +332,17 @@ export default function Checkout() {
               <span>−{money(discount)}</span>
             </div>
           )}
+          {deliveryFee > 0 && (
+            <div className="summary-line">
+              <span>Delivery Fee</span>
+              <span>{money(deliveryFee)}</span>
+            </div>
+          )}
           <div className="summary-line total">
             <span>Total estimate</span>
-            <strong>{money(cart.total - discount)}</strong>
+            <strong>{money(total)}</strong>
           </div>
+
           {cooldown.remaining > 0 && (
             <div className="warning" role="status">
               <strong>Ordering temporarily blocked</strong>
@@ -181,24 +363,15 @@ export default function Checkout() {
               {error}
             </div>
           )}
+
           <button
+            type="button"
             className="button full"
-            disabled={
-              busy ||
-              cooldown.checking ||
-              cooldown.remaining > 0 ||
-              (method === "Demo GCash" && !otp)
-            }
+            disabled={busy || blocked || needsOtp}
             onClick={place}
           >
             <ShoppingBag size={17} />
-            {cooldown.remaining > 0
-              ? `Try again in ${cooldown.countdown}`
-              : cooldown.checking
-                ? "Checking order availability…"
-                : busy
-                  ? "Preparing your order…"
-                  : "Place my order"}
+            {buttonLabel}
           </button>
           <small className="muted">
             Final pricing and stock are checked securely at checkout.
