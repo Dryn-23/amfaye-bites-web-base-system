@@ -17,9 +17,17 @@ const messages = {
     "Your order is ready for pickup!",
     "Your order is ready. You can now collect it from the store.",
   ],
+  "Out for Delivery": [
+    "Your order is out for delivery!",
+    "Your order is on the way. Track your delivery in real-time.",
+  ],
   Completed: [
     "Order completed. Thank you!",
     "Your order has been marked completed. Thank you for choosing Amfaye Bites.",
+  ],
+  Delivered: [
+    "Your order has been delivered!",
+    "Your order has been delivered. Enjoy your treats!",
   ],
   Cancelled: [
     "Your order was cancelled",
