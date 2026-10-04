@@ -8,6 +8,8 @@ import App from "./App";
 import "./styles.css";
 import "./theme.css";
 import "./animations.css";
+import "./components/marketing.css";
+import "./components/chatbot.css";
 class ErrorBoundary extends React.Component {
   state = { error: false };
   static getDerivedStateFromError() {

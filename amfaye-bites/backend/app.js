@@ -18,6 +18,8 @@ import preparation from "./routes/preparationRoutes.js";
 import reviews from "./routes/reviewRoutes.js";
 import chats from "./routes/chatRoutes.js";
 import notifications from "./routes/notificationRoutes.js";
+import flashSales from "./routes/flashSales.js";
+import bundles from "./routes/bundles.js";
 import { errorHandler } from "./middleware/errorMiddleware.js";
 
 export const app = express();
@@ -92,6 +94,8 @@ const routes = {
   users,
   reports,
   notifications,
+  "flash-sales": flashSales,
+  bundles,
 };
 
 for (const [path, router] of Object.entries(routes)) {

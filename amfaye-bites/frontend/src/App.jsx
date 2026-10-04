@@ -35,6 +35,8 @@ import Analytics from "./pages/admin/Analytics";
 import Users from "./pages/admin/Users";
 import Settings from "./pages/admin/Settings";
 import { useAuth } from "./context/AuthContext";
+import ChatBot from "./components/ChatBot";
+
 function CustomerLayout() {
   return (
     <>
@@ -43,6 +45,7 @@ function CustomerLayout() {
         <Outlet />
       </main>
       <Footer />
+      <ChatBot />
     </>
   );
 }

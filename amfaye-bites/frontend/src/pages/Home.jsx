@@ -14,15 +14,28 @@ import { api } from "../services/api";
 import ProductCard from "../components/ProductCard";
 import ProductModal from "../components/ProductModal";
 import Loading from "../components/Loading";
+import FlashSale from "../components/FlashSale";
+import BundleDeals from "../components/BundleDeals";
 export default function Home() {
   const [products, setProducts] = useState([]);
   const [selected, setSelected] = useState(null);
   const [tab, setTab] = useState("All favorites");
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(true);
+  const [flashSales, setFlashSales] = useState([]);
+  const [bundles, setBundles] = useState([]);
+
   useEffect(() => {
-    api("/products")
-      .then(setProducts)
+    Promise.all([
+      api("/products"),
+      api("/flash-sales/active").catch(() => []),
+      api("/bundles/active").catch(() => []),
+    ])
+      .then(([productsData, flashSalesData, bundlesData]) => {
+        setProducts(productsData);
+        setFlashSales(flashSalesData);
+        setBundles(bundlesData);
+      })
       .catch((e) => setError(e.message))
       .finally(() => setLoading(false));
   }, []);
@@ -145,6 +158,18 @@ export default function Home() {
           </span>
         </div>
       </div>
+
+      {flashSales.length > 0 && <FlashSale flashSales={flashSales} />}
+
+      {bundles.length > 0 && (
+        <section className="container">
+          <BundleDeals bundles={bundles} onSelect={(bundle) => {
+            // Handle bundle selection - could add to cart or show modal
+            console.log("Bundle selected:", bundle);
+          }} />
+        </section>
+      )}
+
       <section className="section container favorites">
         <div className="section-heading">
           <div>
