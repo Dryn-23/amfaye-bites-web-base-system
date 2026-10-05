@@ -35,6 +35,7 @@ import Analytics from "./pages/admin/Analytics";
 import Users from "./pages/admin/Users";
 import Settings from "./pages/admin/Settings";
 import PromotionsAdmin from "./pages/admin/PromotionsAdmin";
+import ShiftReport from "./pages/admin/ShiftReport";
 import { useAuth } from "./context/AuthContext";
 import ChatBot from "./components/ChatBot";
 
@@ -152,6 +153,7 @@ export default function App() {
           ["customers", Customers],
           ["sales", Sales],
           ["reports", Reports],
+          ["cash-drawer", ShiftReport],
           ["analytics", Analytics],
           ["users", Users],
           ["settings", Settings],

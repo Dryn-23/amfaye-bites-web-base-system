@@ -1,5 +1,8 @@
-import { Sale, Order, Ingredient } from "../models/index.js";
+import { Sale, Order, Ingredient, Payment, User } from "../models/index.js";
 import { z } from "zod";
+import { Types } from "mongoose";
+import { id } from "../utils/validators.js";
+import { round } from "./orderService.js";
 export function dates(query) {
   const schema = z.string().regex(/^\d{4}-\d{2}-\d{2}$/);
   const filter = {};
@@ -160,4 +163,63 @@ export async function monthlyComparison() {
     },
     { $sort: { _id: 1 } },
   ]);
+}
+// Cash drawer / shift summary. Groups settled cash payments by cashier so the
+// drawer can be counted against what the system expects to be in it.
+export async function cashDrawer(query) {
+  const { user } = query;
+  const cashier = user ? id.parse(user) : undefined;
+  const rows = await Payment.aggregate([
+    {
+      $match: {
+        method: "Cash",
+        status: "Paid",
+        ...dates(query),
+      },
+    },
+    { $lookup: { from: "orders", localField: "order", foreignField: "_id", as: "o" } },
+    { $unwind: "$o" },
+    ...(cashier ? [{ $match: { "o.cashier": new Types.ObjectId(cashier) } }] : []),
+    {
+      $group: {
+        _id: "$o.cashier",
+        orders: { $sum: 1 },
+        sales: { $sum: "$amount" },
+        received: { $sum: "$received" },
+        change: { $sum: "$change" },
+      },
+    },
+    { $sort: { received: -1 } },
+  ]);
+
+  const names = await User.find({ _id: { $in: rows.map((r) => r._id).filter(Boolean) } })
+    .select("name role")
+    .lean();
+  const byId = new Map(names.map((u) => [String(u._id), u.name]));
+
+  const shaped = rows.map((r) => ({
+    cashier: r._id || null,
+    name: r._id ? byId.get(String(r._id)) || "Unknown" : "Web orders",
+    orders: r.orders,
+    sales: round(r.sales),
+    received: round(r.received),
+    change: round(r.change),
+    // Cash that should be in the drawer: every peso handed over, less the
+    // change already given back out.
+    expected: round(r.received - r.change),
+  }));
+
+  return {
+    rows: shaped,
+    totals: shaped.reduce(
+      (acc, r) => ({
+        orders: acc.orders + r.orders,
+        sales: round(acc.sales + r.sales),
+        received: round(acc.received + r.received),
+        change: round(acc.change + r.change),
+        expected: round(acc.expected + r.expected),
+      }),
+      { orders: 0, sales: 0, received: 0, change: 0, expected: 0 },
+    ),
+  };
 }

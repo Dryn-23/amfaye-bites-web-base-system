@@ -13,6 +13,7 @@ for (const name of [
   "peakHours",
   "paymentMethods",
   "monthlyComparison",
+  "cashDrawer",
 ])
   r.get(
     "/" + name,

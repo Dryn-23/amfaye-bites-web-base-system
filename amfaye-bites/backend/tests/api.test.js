@@ -7,7 +7,7 @@ import { MongoMemoryReplSet } from "mongodb-memory-server";
 import { app } from "../app.js";
 import { seed } from "../seed/seedDatabase.js";
 import * as M from "../models/index.js";
-let repl, customer, admin, other, products;
+let repl, customer, admin, other, products, adminId;
 const req = (method, path, token, body) => {
   const r = request(app)[method]("/api" + path);
   if (token) r.set("Authorization", "Bearer " + token);
@@ -38,6 +38,7 @@ before(async () => {
   });
   assert.equal(a.status, 200);
   admin = a.body.token;
+  adminId = a.body.user._id;
   products = (await req("get", "/products")).body;
 });
 after(async () => {
@@ -219,6 +220,43 @@ test("POS validates cash amount, creates sale, payment, receipt and change", asy
   assert.ok(d.body.receipt);
   assert.equal(r.body.status, "Completed");
   assert.ok(await M.Sale.exists({ order: r.body._id }));
+
+  // The cash drawer report must attribute that order to this cashier and
+  // report expected cash as received minus change given back out.
+  const drawer = await req("get", "/reports/cashDrawer", admin);
+  assert.equal(drawer.status, 200);
+  const mine = drawer.body.rows.find((x) => x.cashier === adminId);
+  assert.ok(mine, "POS order attributed to the cashier who rang it up");
+  assert.ok(mine.orders >= 1);
+  assert.ok(mine.received >= 200);
+  assert.equal(
+    mine.expected,
+    Math.round((mine.received - mine.change) * 100) / 100,
+  );
+  assert.equal(
+    drawer.body.totals.expected,
+    Math.round(drawer.body.rows.reduce((s, x) => s + x.expected, 0) * 100) /
+      100,
+  );
+  // Demo GCash is simulated money and never entered the drawer.
+  assert.ok(!drawer.body.rows.some((x) => x.sales && x.cashier === null));
+  const onlyMine = await req(
+    "get",
+    "/reports/cashDrawer?user=" + adminId,
+    admin,
+  );
+  assert.equal(onlyMine.body.rows.length, 1);
+  assert.equal(onlyMine.body.rows[0].cashier, adminId);
+  assert.equal(
+    (await req("get", "/reports/cashDrawer?from=2099-01-01", admin)).body.rows
+      .length,
+    0,
+  );
+  assert.equal(
+    (await req("get", "/reports/cashDrawer?user=nope", admin)).status,
+    400,
+  );
+  assert.equal((await req("get", "/reports/cashDrawer", customer)).status, 403);
 });
 test("Shake pricing, add-ons, demo OTP, one-time verification and payment void", async () => {
   const p = products.find((p) => p.customizable);
