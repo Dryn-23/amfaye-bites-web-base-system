@@ -258,6 +258,156 @@ test("POS validates cash amount, creates sale, payment, receipt and change", asy
   );
   assert.equal((await req("get", "/reports/cashDrawer", customer)).status, 403);
 });
+test("Promotion CRUD validates input, uppercases codes and tracks redemptions", async () => {
+  // Promotions are managed by admins only.
+  assert.equal(
+    (
+      await req("post", "/promotions", customer, {
+        name: "Nope",
+        code: "NOPE",
+        percent: 10,
+      })
+    ).status,
+    403,
+  );
+  // A malformed id fails validation before the lookup; a well-formed
+  // but unknown id reaches the lookup and reports 404.
+  assert.equal((await req("put", "/promotions/bad", admin, { name: "Fine" })).status, 400);
+  assert.equal((await req("delete", "/promotions/bad", admin)).status, 400);
+  // Body validation runs before the lookup, so a too-short name is a 400
+  // even for an id that does not exist.
+  const missing = new mongoose.Types.ObjectId().toString();
+  assert.equal((await req("put", "/promotions/" + missing, admin, { name: "X" })).status, 400);
+  assert.equal((await req("put", "/promotions/" + missing, admin, { name: "Fine" })).status, 404);
+  assert.equal((await req("delete", "/promotions/" + missing, admin)).status, 404);
+
+  // Codes are normalized to uppercase; well-formed creates return 201.
+  const c = await req("post", "/promotions", admin, {
+    name: "Test Promo",
+    code: "sweet20",
+    description: "Twenty off for the suite",
+    percent: 20,
+    expiresAt: "2030-01-01T00:00:00.000Z",
+  });
+  assert.equal(c.status, 201, JSON.stringify(c.body));
+  assert.equal(c.body.code, "SWEET20");
+  assert.equal(c.body.active, true);
+  assert.equal(c.body.useCount, 0);
+  const id = c.body._id;
+
+  // Percent is bounded to 1-50 and expiresAt must be a real datetime.
+  for (const bad of [
+    { name: "Low", code: "TOOLOW", percent: 0 },
+    { name: "High", code: "TOOHIGH", percent: 51 },
+    { name: "Date", code: "BADDATE", percent: 10, expiresAt: "not-a-date" },
+    { name: "No code", percent: 10 },
+  ]) {
+    assert.equal((await req("post", "/promotions", admin, bad)).status, 400, JSON.stringify(bad));
+  }
+
+  // The public list shows only active, unexpired codes.
+  const list = (await req("get", "/promotions")).body;
+  assert.ok(list.some((p) => p.code === "SWEET10"));
+  assert.ok(list.some((p) => p.code === "SWEET20"));
+  const hidden = await req("post", "/promotions", admin, {
+    name: "Retired",
+    code: "retired5",
+    percent: 5,
+    description: "Retired",
+    active: false,
+  });
+  const lapsed = await req("post", "/promotions", admin, {
+    name: "Lapsed",
+    code: "lapsed5",
+    percent: 5,
+    description: "Lapsed",
+    expiresAt: "2020-01-01T00:00:00.000Z",
+  });
+  assert.equal(hidden.status, 201, JSON.stringify(hidden.body));
+  assert.equal(lapsed.status, 201, JSON.stringify(lapsed.body));
+  assert.ok(!(await req("get", "/promotions")).body.some((p) => p.code === "RETIRED5"));
+  assert.ok(!(await req("get", "/promotions")).body.some((p) => p.code === "LAPSED5"));
+  // Admins still see them in the full listing.
+  const all = (await req("get", "/promotions/all", admin)).body;
+  assert.ok(all.some((p) => p.code === "RETIRED5" && p.active === false));
+  assert.ok(all.some((p) => p.code === "LAPSED5"));
+
+  // Partial update toggles one field and leaves the rest alone.
+  const upd = await req("put", "/promotions/" + id, admin, { active: false });
+  assert.equal(upd.status, 200, JSON.stringify(upd.body));
+  assert.equal(upd.body.active, false);
+  assert.equal(upd.body.percent, 20);
+  assert.equal(
+    upd.body.useCount,
+    0,
+    "editing a promotion must not rewrite redemption counters",
+  );
+  assert.equal((await req("put", "/promotions/000000000000000000000000", admin, { percent: 5 })).status, 404);
+  assert.equal((await req("put", "/promotions/" + id, customer, { active: true })).status, 403);
+
+  // Delete is idempotent-ish: 204 then 404.
+  assert.equal((await req("delete", "/promotions/" + id, admin)).status, 204);
+  assert.equal((await req("delete", "/promotions/" + id, admin)).status, 404);
+  assert.equal(await M.Promotion.exists({ _id: id }), null);
+  await M.Promotion.deleteOne({ _id: hidden.body._id });
+  await M.Promotion.deleteOne({ _id: lapsed.body._id });
+
+  // Checkout honours live codes and counts each redemption once.
+  const p = products[2];
+  const seed = await M.Promotion.findOne({ code: "SWEET10" });
+  const starting = seed.useCount;
+  const okOrder = await req(
+    "post",
+    "/orders",
+    customer,
+    makeOrder(p, { promoCode: "sweet10" }),
+  );
+  assert.equal(okOrder.status, 201, JSON.stringify(okOrder.body));
+  assert.equal(
+    okOrder.body.discount,
+    Math.round((p.price * seed.percent) / 100 * 100) / 100,
+  );
+  assert.equal((await M.Promotion.findById(seed._id)).useCount, starting + 1);
+  // Status changes do not refund or inflate the counter.
+  assert.equal(
+    (
+      await req("put", "/orders/" + okOrder.body._id + "/status", admin, {
+        status: "Cancelled",
+      })
+    ).status,
+    200,
+  );
+  assert.equal((await M.Promotion.findById(seed._id)).useCount, starting + 1);
+
+  // Inactive, expired and unknown codes are all refused at checkout.
+  const dead = [
+    { code: "RETIRED5", percent: 5, active: false },
+    { code: "LAPSED5", percent: 5, expiresAt: new Date("2020-01-01") },
+  ];
+  for (const spec of dead) {
+    const made = await M.Promotion.create({
+      name: "Dead code",
+      percent: spec.percent,
+      code: spec.code,
+      active: spec.active,
+      expiresAt: spec.expiresAt,
+    });
+    const r = await req(
+      "post",
+      "/orders",
+      customer,
+      makeOrder(p, { promoCode: spec.code }),
+    );
+    assert.equal(r.status, 400, spec.code + " should be refused");
+    assert.match(r.body.message, /invalid or expired/i);
+    assert.equal((await M.Promotion.findById(made._id)).useCount, 0);
+    await M.Promotion.deleteOne({ _id: made._id });
+  }
+  assert.equal(
+    (await req("post", "/orders", customer, makeOrder(p, { promoCode: "NOSUCHCODE" }))).status,
+    400,
+  );
+});
 test("Shake pricing, add-ons, demo OTP, one-time verification and payment void", async () => {
   const p = products.find((p) => p.customizable);
   const addons = (await req("get", "/addons")).body;
