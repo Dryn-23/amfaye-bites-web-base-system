@@ -9,7 +9,7 @@ export default function About() {
         <p>Welcome to Amfaye Bites, your daily dose of happy.</p>
       </div>
       <div className="about-layout">
-        <img src="/hero.png" alt="Freshly baked pastries and fruit shakes" />
+        <img src="public\hero.png" alt="Freshly baked pastries and fruit shakes" />
         <div>
           <span className="eyebrow">FROM OUR KITCHEN, WITH LOVE</span>
           <h2>
