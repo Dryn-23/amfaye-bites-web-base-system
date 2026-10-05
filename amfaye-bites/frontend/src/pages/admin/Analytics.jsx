@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { TrendingUp, Clock, CreditCard, PieChart } from "lucide-react";
+import { TrendingUp, Clock, CreditCard, PieChart, Percent } from "lucide-react";
 import { api } from "../../services/api";
 import { money } from "../../utils/currency";
 import Loading from "../../components/Loading";
@@ -146,11 +146,11 @@ export default function Analytics() {
             </div>
             <div className="stat-card">
               <div>
-                <span>Discounts Given</span>
-                <TrendingUp size={19} />
+                <span>VAT Collected (12%)</span>
+                <Percent size={19} />
               </div>
-              <strong>{money(data.sales.summary.discount)}</strong>
-              <small>Promotional savings</small>
+              <strong>{money(data.sales.summary.vat || 0)}</strong>
+              <small>Estimated output tax</small>
             </div>
           </div>
 

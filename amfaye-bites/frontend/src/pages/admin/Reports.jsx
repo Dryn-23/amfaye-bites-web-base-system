@@ -120,6 +120,11 @@ export default function Reports({ salesOnly = false }) {
               <small>Cash and demo GCash</small>
             </div>
             <div className="stat-card">
+              <span>VAT collected (12%)</span>
+              <strong>{money(data.summary.vat || 0)}</strong>
+              <small>Estimated output tax</small>
+            </div>
+            <div className="stat-card">
               <span>Discounts given</span>
               <strong>{money(data.summary.discount)}</strong>
               <small>A little extra happy</small>

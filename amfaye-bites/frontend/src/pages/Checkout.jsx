@@ -11,6 +11,7 @@ import EmptyState from "../components/EmptyState";
 import Loading from "../components/Loading";
 
 const DELIVERY_FEE = 50;
+const VAT_RATE = 0.12; // 12% Philippine VAT — must match backend VAT_RATE
 const PAYMENT_METHODS = ["Cash", "Demo GCash"];
 const EMPTY_ADDRESS = { street: "", barangay: "", city: "", zipCode: "" };
 
@@ -53,7 +54,8 @@ export default function Checkout() {
   const offer = promotions.find((p) => p.code === promo.trim().toUpperCase());
   const discount = offer ? Math.round(cart.total * offer.percent) / 100 : 0;
   const deliveryFee = isDelivery ? DELIVERY_FEE : 0;
-  const total = cart.total - discount + deliveryFee;
+  const vat = Math.round(cart.total * VAT_RATE * 100) / 100;
+  const total = cart.total - discount + deliveryFee + vat;
 
   const blocked = cooldown.remaining > 0 || cooldown.checking;
   const needsOtp = method === "Demo GCash" && !otp;
@@ -332,6 +334,10 @@ export default function Checkout() {
               <span>−{money(discount)}</span>
             </div>
           )}
+          <div className="summary-line">
+            <span>VAT (12%)</span>
+            <span>{money(vat)}</span>
+          </div>
           {deliveryFee > 0 && (
             <div className="summary-line">
               <span>Delivery Fee</span>

@@ -26,6 +26,7 @@ export async function sales(query) {
         _id: null,
         revenue: { $sum: "$amount" },
         discount: { $sum: "$discount" },
+        vat: { $sum: "$vat" },
         count: { $sum: 1 },
       },
     },
@@ -48,7 +49,7 @@ export async function sales(query) {
   ]);
   return {
     entries,
-    summary: summary || { revenue: 0, discount: 0, count: 0 },
+    summary: summary || { revenue: 0, discount: 0, vat: 0, count: 0 },
     daily,
   };
 }

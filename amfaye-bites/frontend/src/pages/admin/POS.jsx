@@ -43,7 +43,8 @@ export default function POS() {
   const total = items.reduce((s, i) => s + i.unitPrice * i.quantity, 0);
   const offer = offers.find((o) => o.code === promo.trim().toUpperCase());
   const discount = offer ? Math.round(total * offer.percent) / 100 : 0;
-  const due = Math.round((total - discount) * 100) / 100;
+  const vat = Math.round(total * 0.12 * 100) / 100; // 12% VAT — matches backend
+  const due = Math.round((total - discount + vat) * 100) / 100;
   const add = (product, quantity, customization, unitPrice) =>
     setItems((old) => [
       ...old,
@@ -265,6 +266,10 @@ export default function POS() {
           <div className="summary-line">
             <span>Discount</span>
             <b>−{money(discount)}</b>
+          </div>
+          <div className="summary-line">
+            <span>VAT (12%)</span>
+            <b>{money(vat)}</b>
           </div>
           <div className="summary-line total">
             <span>Total</span>

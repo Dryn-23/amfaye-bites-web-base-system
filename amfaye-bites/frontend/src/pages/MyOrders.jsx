@@ -116,6 +116,10 @@ export default function MyOrders() {
                 <span>Discount</span>
                 <b>−{money(data.discount)}</b>
               </div>
+              <div className="summary-line">
+                <span>VAT (12%)</span>
+                <b>{money(data.vat || 0)}</b>
+              </div>
               <div className="summary-line total">
                 <span>Total</span>
                 <b>{money(data.total)}</b>

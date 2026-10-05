@@ -180,6 +180,7 @@ export const Order = model(
     },
     subtotal: money,
     discount: nonnegative,
+    vat: nonnegative,
     total: money,
     deliveryType: {
       type: String,
@@ -257,6 +258,7 @@ export const Sale = model(
     order: { ...ref("Order", true), unique: true },
     amount: money,
     discount: nonnegative,
+    vat: nonnegative,
     voided: { type: Boolean, default: false },
   },
   [[{ createdAt: -1 }, {}]],

@@ -135,7 +135,9 @@ export async function createOrder(body, user) {
       }
       deliveryFee = 50; // Flat fee for prototype
     }
-    const total = round(subtotal - discount + deliveryFee);
+    const vatRate = parseFloat(process.env.VAT_RATE || "0.12"); // 12% default
+    const vat = round(subtotal * vatRate);
+    const total = round(subtotal - discount + deliveryFee + vat);
     let paid = input.paymentMethod === "Demo GCash" || input.source === "pos";
     let received = total;
     if (input.paymentMethod === "Demo GCash") {
@@ -170,6 +172,7 @@ export async function createOrder(body, user) {
           items,
           subtotal,
           discount,
+          vat,
           total,
           deliveryType: input.deliveryType || "pickup",
           deliveryAddress: input.deliveryAddress || undefined,
@@ -259,7 +262,7 @@ export async function recordPayment(order, received, session) {
     { session },
   );
   await Sale.create(
-    [{ order: order._id, amount: order.total, discount: order.discount }],
+    [{ order: order._id, amount: order.total, discount: order.discount, vat: order.vat }],
     { session },
   );
   await Receipt.create(
