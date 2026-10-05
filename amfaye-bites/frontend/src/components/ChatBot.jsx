@@ -1,5 +1,43 @@
 import { useState, useEffect, useRef } from "react";
-import { MessageCircle, X, Send, Bot } from "lucide-react";
+import { X, Send } from "lucide-react";
+
+// Mini pastry-bot: a croissant-shaped body with a robot face.
+function PastryBotIcon({ size = 24 }) {
+  return (
+    <svg
+      width={size}
+      height={size}
+      viewBox="0 0 64 64"
+      fill="none"
+      aria-hidden="true"
+    >
+      {/* antenna */}
+      <line x1="32" y1="6" x2="32" y2="16" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" />
+      <circle cx="32" cy="7" r="3" fill="#FFD166" stroke="currentColor" strokeWidth="1.5" />
+      {/* croissant body */}
+      <path
+        d="M32 16c-6 0-10 4-12 8-1.6 3.2-4 8-2 13 1.4 3.5 4 6 7 7.5 4.4 2.2 9 3.5 14 3.5s9.6-1.3 14-3.5c3-1.5 5.6-4 7-7.5 2-5-.4-9.8-2-13-2-4-6-8-12-8z"
+        fill="#E9B872"
+        stroke="currentColor"
+        strokeWidth="2.5"
+        strokeLinejoin="round"
+      />
+      {/* eyes */}
+      <circle cx="26" cy="32" r="3.2" fill="#2F241A" />
+      <circle cx="38" cy="32" r="3.2" fill="#2F241A" />
+      <circle cx="27.2" cy="30.8" r="1" fill="white" />
+      <circle cx="39.2" cy="30.8" r="1" fill="white" />
+      {/* smile */}
+      <path
+        d="M27 39c2 2 8 2 10 0"
+        stroke="#2F241A"
+        strokeWidth="2"
+        strokeLinecap="round"
+        fill="none"
+      />
+    </svg>
+  );
+}
 
 const FAQ_RESPONSES = {
   hours: {
@@ -38,6 +76,7 @@ const FAQ_RESPONSES = {
 
 export default function ChatBot() {
   const [isOpen, setIsOpen] = useState(false);
+  const [clicked, setClicked] = useState(false);
   const [messages, setMessages] = useState([
     {
       type: "bot",
@@ -107,11 +146,14 @@ export default function ChatBot() {
       {/* Chat Button */}
       {!isOpen && (
         <button
-          className="chatbot-button"
-          onClick={() => setIsOpen(true)}
+          className={`chatbot-button${clicked ? " clicked" : ""}`}
+          onClick={() => {
+            setClicked(true);
+            setIsOpen(true);
+          }}
           aria-label="Open chatbot"
         >
-          <MessageCircle size={24} />
+          <PastryBotIcon size={34} />
           <span className="chatbot-badge">?</span>
         </button>
       )}
@@ -122,7 +164,7 @@ export default function ChatBot() {
           <div className="chatbot-header">
             <div style={{ display: "flex", alignItems: "center", gap: "0.75rem" }}>
               <div className="chatbot-avatar">
-                <Bot size={20} />
+                <PastryBotIcon size={26} />
               </div>
               <div>
                 <div style={{ fontWeight: "600" }}>Amfaye Bot</div>
@@ -141,7 +183,7 @@ export default function ChatBot() {
               <div key={idx} className={`chat-message ${msg.type}`}>
                 {msg.type === "bot" && (
                   <div className="message-avatar">
-                    <Bot size={16} />
+                    <PastryBotIcon size={20} />
                   </div>
                 )}
                 <div className="message-bubble">

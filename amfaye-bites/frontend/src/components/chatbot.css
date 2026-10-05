@@ -24,6 +24,11 @@
   box-shadow: 0 6px 24px rgba(178, 140, 94, 0.5);
 }
 
+/* Bounce when the chatbot is opened */
+.chatbot-button.clicked {
+  animation: clickBounce 0.6s cubic-bezier(0.28, 0.84, 0.42, 1);
+}
+
 .chatbot-badge {
   position: absolute;
   top: -4px;
@@ -224,4 +229,12 @@
     right: 16px;
     bottom: 16px;
   }
+}
+@keyframes clickBounce {
+  0%   { transform: scale(1); }
+  20%  { transform: scale(1.35) rotate(-6deg); }
+  40%  { transform: scale(0.9) rotate(4deg); }
+  60%  { transform: scale(1.15) rotate(-2deg); }
+  80%  { transform: scale(1.02); }
+  100% { transform: scale(1); }
 }
