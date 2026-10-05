@@ -20,6 +20,14 @@ r.get(
   wrap(async (req, res) => res.json(await ProductAddon.find({ active: true }))),
 );
 r.get(
+  "/promotions/all",
+  auth,
+  admin,
+  wrap(async (req, res) =>
+    res.json(await Promotion.find().sort({ createdAt: -1 }).limit(500)),
+  ),
+);
+r.get(
   "/promotions",
   wrap(async (req, res) =>
     res.json(
@@ -54,6 +62,41 @@ r.post(
       ),
     ),
   ),
+);
+r.put(
+  "/promotions/:id",
+  auth,
+  admin,
+  wrap(async (req, res) => {
+    const d = z
+      .object({
+        name: z.string().min(2).max(100),
+        code: z.string().min(2).max(30).transform((s) => s.toUpperCase()),
+        description: z.string().max(300),
+        percent: z.number().min(1).max(50),
+        active: z.boolean(),
+        expiresAt: z.string().datetime().optional().nullable(),
+      })
+      .partial()
+      .parse(req.body);
+    const promo = await Promotion.findByIdAndUpdate(
+      req.params.id,
+      { $set: d },
+      { new: true, runValidators: true },
+    );
+    if (!promo) throw fail(404, "Promotion not found.");
+    res.json(promo);
+  }),
+);
+r.delete(
+  "/promotions/:id",
+  auth,
+  admin,
+  wrap(async (req, res) => {
+    const promo = await Promotion.findByIdAndDelete(req.params.id);
+    if (!promo) throw fail(404, "Promotion not found.");
+    res.status(204).send();
+  }),
 );
 r.get(
   "/cart",

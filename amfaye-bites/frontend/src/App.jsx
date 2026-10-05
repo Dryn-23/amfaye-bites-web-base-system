@@ -34,6 +34,7 @@ import Reports from "./pages/admin/Reports";
 import Analytics from "./pages/admin/Analytics";
 import Users from "./pages/admin/Users";
 import Settings from "./pages/admin/Settings";
+import PromotionsAdmin from "./pages/admin/PromotionsAdmin";
 import { useAuth } from "./context/AuthContext";
 import ChatBot from "./components/ChatBot";
 
@@ -147,6 +148,7 @@ export default function App() {
         {[
           ["products", Products],
           ["categories", Categories],
+          ["promotions", PromotionsAdmin],
           ["customers", Customers],
           ["sales", Sales],
           ["reports", Reports],
