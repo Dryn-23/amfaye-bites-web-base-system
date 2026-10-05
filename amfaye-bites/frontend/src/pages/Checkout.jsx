@@ -308,20 +308,21 @@ export default function Checkout() {
           ))}
 
           <label>
-            Sweet deal code
-            <input
+            Sweet deal
+            <select
               value={promo}
               onChange={(e) => setPromo(e.target.value)}
-              placeholder="Have a promo code?"
-              maxLength={30}
-            />
+            >
+              <option value="">No promo</option>
+              {promotions.map((p) => (
+                <option key={p._id} value={p.code}>
+                  {p.code} — {p.percent}% off
+                </option>
+              ))}
+            </select>
           </label>
-          {promo && (
-            <small className={offer ? "green" : "warning-text"}>
-              {offer
-                ? `${offer.percent}% off — a little treat, on us!`
-                : "Code will be validated when you place your order."}
-            </small>
+          {promo && offer && (
+            <small className="green">{offer.percent}% off — a little treat, on us!</small>
           )}
 
           <div className="summary-line">

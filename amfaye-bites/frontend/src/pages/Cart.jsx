@@ -59,7 +59,7 @@ export default function Cart() {
               Freshly prepared. Securely ordered.
             </p>
             <small className="muted">
-              Have a sweet deal? Apply your code at checkout.
+              Pick a sweet deal from the dropdown at checkout.
             </small>
           </aside>
         </div>
