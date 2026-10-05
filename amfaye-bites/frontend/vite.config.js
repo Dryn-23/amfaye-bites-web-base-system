@@ -5,17 +5,8 @@ export default defineConfig({
   build: {
     rollupOptions: {
       output: {
-        manualChunks: {
-          admin: [
-            "lucide-react",
-            "./src/pages/admin/PromotionsAdmin.jsx",
-            "./src/pages/admin/ShiftReport.jsx",
-            "./src/pages/admin/Analytics.jsx",
-            "./src/pages/admin/Reports.jsx",
-            "./src/pages/admin/Dashboard.jsx",
-          ],
-          vendor: ["react", "react-dom", "react-router-dom"],
-        },
+        // Keep React out of the app chunk so it can be cached across deploys.
+        manualChunks: { vendor: ["react", "react-dom", "react-router-dom"] },
       },
     },
   },
