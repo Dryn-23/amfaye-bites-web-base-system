@@ -127,6 +127,7 @@ export async function createOrder(body, user) {
       }).session(session);
       if (!promo) throw fail(400, "Promotion code is invalid or expired.");
       discount = round((subtotal * promo.percent) / 100);
+      await Promotion.findByIdAndUpdate(promo._id, { $inc: { useCount: 1 } }).session(session);
     }
     let deliveryFee = 0;
     if (input.deliveryType === "delivery") {

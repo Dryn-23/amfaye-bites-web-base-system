@@ -78,7 +78,14 @@ export default function PromotionsAdmin() {
     try {
       await api("/promotions/" + row._id, {
         method: "PUT",
-        body: { ...row, active: !row.active, expiresAt: row.expiresAt || null },
+        body: {
+          name: row.name,
+          code: row.code,
+          description: row.description || "",
+          percent: row.percent,
+          active: !row.active,
+          expiresAt: row.expiresAt || null,
+        },
       });
       await load();
     } catch (e) {
@@ -132,6 +139,7 @@ export default function PromotionsAdmin() {
                 <th>Code</th>
                 <th>Name</th>
                 <th>Off</th>
+                <th>Used</th>
                 <th>Status</th>
                 <th>Expires</th>
                 <th></th>
@@ -147,6 +155,7 @@ export default function PromotionsAdmin() {
                   <td>
                     <span className="badge">{p.percent}% off</span>
                   </td>
+                  <td>{p.useCount || 0}</td>
                   <td>
                     <span
                       className={"status status-" + (p.active ? "confirmed" : "cancelled")}
@@ -213,7 +222,7 @@ export default function PromotionsAdmin() {
               ))}
               {!rows.length && (
                 <tr>
-                  <td colSpan={6}>
+                  <td colSpan={7}>
                     <div className="empty compact">
                       <Percent size={28} />
                       <h3>No promotions yet</h3>

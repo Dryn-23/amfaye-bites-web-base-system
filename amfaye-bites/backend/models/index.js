@@ -251,6 +251,7 @@ export const Promotion = model("Promotion", {
   percent: { type: Number, min: 0, max: 50, required: true },
   active: { type: Boolean, default: true },
   expiresAt: Date,
+  useCount: { type: Number, default: 0 },
 });
 export const Sale = model(
   "Sale",
