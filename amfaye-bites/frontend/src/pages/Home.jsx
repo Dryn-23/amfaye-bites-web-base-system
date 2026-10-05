@@ -159,7 +159,12 @@ export default function Home() {
         </div>
       </div>
 
-      {flashSales.length > 0 && <FlashSale flashSales={flashSales} />}
+      {flashSales.length > 0 && (
+        <FlashSale
+          endTime={flashSales[0].endDate}
+          discount={flashSales[0].discountPercent}
+        />
+      )}
 
       {bundles.length > 0 && (
         <section className="container">
