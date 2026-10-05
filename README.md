@@ -219,20 +219,6 @@ The backend calls `mongoose.connect(process.env.MONGODB_URI, { dbName: 'amfaye_b
 
 ## Environment Variables
 
-### Backend `.env`
-
-```env
-PORT=5000
-MONGODB_URI=mongodb://127.0.0.1:27017/amfaye_bites?replicaSet=rs0
-JWT_SECRET=GENERATE_A_RANDOM_SECRET_AT_LEAST_32_CHARACTERS
-JWT_EXPIRES_IN=1d
-FRONTEND_URL=http://localhost:5173
-NODE_ENV=development
-DEMO_PAYMENTS_ENABLED=true
-SEED_ADMIN_EMAIL=YOUR_ADMIN_EMAIL
-SEED_ADMIN_PASSWORD=YOUR_UNIQUE_ADMIN_PASSWORD_AT_LEAST_12_CHARACTERS
-```
-
 Generate a secret in a terminal:
 
 ```bash
