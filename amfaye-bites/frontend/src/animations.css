@@ -261,10 +261,10 @@ html {
 }
 
 /* Image loading fade in */
-img {
+/* img {
   opacity: 0;
   transition: opacity 0.3s ease;
-}
+} */
 
 img.loaded {
   opacity: 1;
