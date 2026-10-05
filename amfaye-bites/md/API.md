@@ -116,7 +116,16 @@ Identifiers in these examples are placeholders; replace them with real 24-charac
 }
 ```
 
-No `amountReceived` is permitted on a web cash order. The customer cannot mark it Paid. The API returns the persisted Order with server-computed subtotal, discount and total.
+No `amountReceived` is permitted on a web cash order. The customer cannot mark it Paid. The API returns the persisted Order with server-computed subtotal, discount, VAT and total.
+
+Order totals are always computed server-side:
+
+```
+vat   = round(subtotal * VAT_RATE)        // VAT_RATE defaults to 0.12 (12% PH VAT)
+total = round(subtotal - discount + deliveryFee + vat)
+```
+
+VAT is charged on the pre-discount subtotal and applies to every order, pickup or delivery. Delivery orders add a flat ₱50 fee, which is not taxed.
 
 ### POS cash order
 

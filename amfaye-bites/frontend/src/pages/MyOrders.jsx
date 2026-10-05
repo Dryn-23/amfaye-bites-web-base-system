@@ -120,6 +120,12 @@ export default function MyOrders() {
                 <span>VAT (12%)</span>
                 <b>{money(data.vat || 0)}</b>
               </div>
+              {data.deliveryType === "delivery" && (
+                <div className="summary-line">
+                  <span>Delivery Fee</span>
+                  <b>{money(data.deliveryFee || 0)}</b>
+                </div>
+              )}
               <div className="summary-line total">
                 <span>Total</span>
                 <b>{money(data.total)}</b>
@@ -132,12 +138,6 @@ export default function MyOrders() {
                 <span>Payment status</span>
                 <b>{data.paymentStatus}</b>
               </div>
-              {data.deliveryType === "delivery" && (
-                <div className="summary-line">
-                  <span>Delivery Fee</span><script></script>
-                  <b>{money(data.deliveryFee || 0)}</b>
-                </div>
-              )}
               {data.payment && (
                 <>
                   <div className="summary-line">

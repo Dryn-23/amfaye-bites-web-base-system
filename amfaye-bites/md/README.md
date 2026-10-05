@@ -24,12 +24,13 @@ A working customer ordering website and staff POS for pastries and fruit shakes.
 
 ### Scope and business rules
 
-1. Pickup only; there is no delivery service or real online payment gateway.
+1. Pickup and delivery both supported (`deliveryType`; default pickup). Delivery carries a flat ₱50 fee.
 2. Guests may build a bag; signing in is required before checkout and placing an order.
 3. Online cash orders reserve stock immediately and are paid by staff at pickup. Pending orders do not automatically expire; staff must cancel abandoned orders to release stock.
 4. Online demo-paid orders also reserve stock immediately. Cancelling an eligible demo order voids its simulated sale/payment and restores stock.
-5. Order status flow: `Pending → Confirmed → Preparing → Ready for Pickup → Completed`. Cancellation is allowed only from Pending or Confirmed. Completed orders cannot be edited.
-6. Cash-paid orders cannot be cancelled through this system. **Real cash refunds, accounting reconciliation, taxes/VAT, statutory receipt compliance and advanced return workflows are outside this school demo.** Receipts are prototype receipts, not tax invoices.
+5. Order status flow: `Pending → Confirmed → Preparing → Ready for Pickup → Completed` (pickup) or `Pending → Confirmed → Preparing → Out for Delivery → Delivered` (delivery). Cancellation is allowed only from Pending or Confirmed. Completed orders cannot be edited.
+6. Cash-paid orders cannot be cancelled through this system. **Real cash refunds, accounting reconciliation, BIR statutory receipt compliance and advanced return workflows are outside this school demo.** Receipts are prototype receipts, not tax invoices.
+6a. Every order carries 12% VAT (`VAT_RATE`, configurable) on the pre-discount subtotal, plus a flat ₱50 delivery fee on delivery orders. Both are computed server-side and shown on the cart, receipt, POS and admin reports. This is a simplified single-rate model, not full BIR compliance.
 7. Product stock is a sellable-serving limit; recipes track ingredients separately. Both must be sufficient. Ingredient restocking does not automatically manufacture/increase product servings.
 8. Products are archived, not physically deleted, to preserve historical references. An archived product remains visible as unavailable and can be re-enabled by editing it. Categories cannot be removed while products reference them.
 9. Reports include simulated payments and are not real financial statements. Product revenue is gross before order discounts; the sales summary is net of discounts and excludes voided sales.

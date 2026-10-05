@@ -145,7 +145,8 @@ test("Order creation is authoritative, atomic and idempotent; cancellation resto
   const body = makeOrder(p, { total: 1 });
   const r = await req("post", "/orders", customer, body);
   assert.equal(r.status, 201, JSON.stringify(r.body));
-  assert.equal(r.body.total, p.price);
+  assert.equal(r.body.total, Math.round(p.price * 1.12 * 100) / 100);
+  assert.equal(r.body.subtotal, p.price);
   assert.equal(r.body.paymentStatus, "Pending");
   assert.equal((await M.Product.findById(p._id)).stock, initial.stock - 1);
   assert.ok(
@@ -208,7 +209,8 @@ test("POS validates cash amount, creates sale, payment, receipt and change", asy
     makeOrder(p, { source: "pos", amountReceived: 200, promoCode: "SWEET10" }),
   );
   assert.equal(r.status, 201, JSON.stringify(r.body));
-  assert.equal(r.body.total, Math.round(p.price * 0.9 * 100) / 100);
+  // VAT is charged on the pre-discount subtotal: total = subtotal - 10% + 12% VAT.
+  assert.equal(r.body.total, Math.round((p.price - p.price * 0.1 + p.price * 0.12) * 100) / 100);
   const d = await req("get", "/orders/" + r.body._id, admin);
   assert.equal(
     d.body.payment.change,
@@ -270,7 +272,7 @@ test("Shake pricing, add-ons, demo OTP, one-time verification and payment void",
     otpSession: otp.sessionId,
   });
   assert.equal(r.status, 201, JSON.stringify(r.body));
-  assert.equal(r.body.total, 2 * (p.price + 40 + addons[0].price));
+  assert.equal(r.body.total, Math.round(2 * (p.price + 40 + addons[0].price) * 1.12 * 100) / 100);
   assert.equal(r.body.items[0].customization.sugar, "25%");
   assert.equal(
     (
