@@ -2,7 +2,7 @@ import ChatNavLink from "./ChatNavLink";
 import NotificationBell from "./NotificationBell";
 import { Link, NavLink } from "react-router-dom";
 import {
-  ShoppingBag,
+  ShoppingCart,
   UserRound,
   ArrowUpRight,
   Menu as MenuIcon,
@@ -68,8 +68,8 @@ export default function Navbar() {
               to="/cart"
               aria-label={`Cart with ${count} items`}
             >
-              <ShoppingBag size={19} />
-              <span>{count}</span>
+              <ShoppingCart size={28} strokeWidth={2} />
+              <span style={{ fontSize: 14, fontWeight: 700 }}>{count}</span>
             </Link>
             <Link to="/menu" className="button small nav-order">
               Order now <ArrowUpRight size={16} />

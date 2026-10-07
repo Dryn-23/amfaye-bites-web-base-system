@@ -771,3 +771,9 @@ html[data-theme="dark"] ::selection {
   width: 85%;
   margin-bottom: 8px;
 }
+/* Mobile keyboard visibility fix */
+@media (max-width: 600px) {
+  input, textarea, select { font-size: 16px !important; min-height: 44px; }
+  .panel, form, section.panel { padding-bottom: 120px !important; }
+  body { min-height: 100dvh; }
+}
