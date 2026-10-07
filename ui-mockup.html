@@ -1,0 +1,228 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Amfaye UI Mockup — Panels & Skeleton</title>
+<link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Inter:wght@300;400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+/* Design plan — dark editorial, panel-skeleton system
+   Palette: ink #0b0c10, slate #17181f, paper #f2efe9, amber #d4a843, mist #e8e6df
+   Type: Instrument Serif display, Inter body, JetBrains Mono data
+   Layout: sidebar + main with shimmer skeleton cards, tab nav, hover panels */
+:root{
+  --ink:#0b0c10; --slate:#17181f; --paper:#f2efe9; --amber:#d4a843; --mist:#e8e6df;
+  --fg:var(--ink); --bg:var(--paper); --card:var(--mist); --accent:var(--amber); --border:#cecbb8;
+  --font-display:'Instrument Serif', Georgia, serif; --font-body:'Inter', system-ui, sans-serif; --font-mono:'JetBrains Mono', ui-monospace, monospace;
+  --radius:14px; --shadow:0 12px 40px rgba(11,12,16,0.08); --shadow-hover:0 24px 60px rgba(11,12,16,0.12);
+  --shimmer:linear-gradient(110deg,#eceae3 8%,#f7f6f0 18%,#eceae3 33%); --shimmer-size:200% 100%;
+}
+@media (prefers-color-scheme: dark){ :root:not([data-theme="light"]){ --fg:var(--mist); --bg:var(--ink); --card:var(--slate); --border:#2a2d3a; --shadow:0 12px 40px rgba(0,0,0,0.35); --shadow-hover:0 24px 60px rgba(0,0,0,0.45); } }
+:root[data-theme="dark"]{ --fg:var(--mist); --bg:var(--ink); --card:var(--slate); --border:#2a2d3a; --shadow:0 12px 40px rgba(0,0,0,0.35); --shadow-hover:0 24px 60px rgba(0,0,0,0.45); color-scheme:dark; }
+*{box-sizing:border-box}
+body{margin:0;padding:24px 28px;min-height:100vh;font-family:var(--font-body);background:var(--bg);color:var(--fg);line-height:1.55;transition:background .35s ease, color .35s ease;}
+@media(min-width:1024px){body{padding:36px 48px}}
+
+/* Layout */
+.app{max-width:1200px;margin:0 auto;display:grid;gap:28px;grid-template-columns:240px 1fr}
+@media(max-width:900px){.app{grid-template-columns:1fr;gap:20px}}
+
+/* Sidebar */
+.sidebar{position:sticky;top:28px;height:max-content;background:var(--card);border:1px solid var(--border);border-radius:var(--radius);padding:22px 18px;box-shadow:var(--shadow);transition:box-shadow .3s ease, background .35s ease, border-color .35s ease;}
+.sidebar:hover{box-shadow:var(--shadow-hover)}
+.sidebar h2{font-family:var(--font-display);font-size:26px;font-weight:400;margin:0 0 6px;letter-spacing:-0.02em;line-height:1.1}
+.sidebar p{font-family:var(--font-body);font-size:12px;color:#7a7466;margin:0 0 18px}
+.nav{display:flex;flex-direction:column;gap:3px}
+.nav button{font-family:var(--font-body);font-size:13px;font-weight:500;padding:10px 12px;border-radius:10px;border:none;background:transparent;color:var(--fg);cursor:pointer;text-align:left;transition:background .15s ease, color .15s ease;position:relative;overflow:hidden}
+.nav button::after{content:'';position:absolute;left:0;top:0;height:100%;width:0;background:rgba(212,168,67,0.10);transition:width .25s ease;border-radius:10px}
+.nav button:hover::after{width:100%}
+.nav button.active{background:rgba(212,168,67,0.12);color:var(--amber)}
+.nav button svg{width:16px;height:16px;display:inline-block;vertical-align:-3px;margin-right:6px;opacity:.8}
+
+/* Main */
+.main{min-width:0}
+.header{display:flex;align-items:center;justify-content:space-between;gap:16px;margin-bottom:18px;flex-wrap:wrap}
+.header h1{font-family:var(--font-display);font-size:42px;font-weight:400;margin:0;letter-spacing:-0.03em;line-height:1.05}
+.header .meta{font-family:var(--font-mono);font-size:11px;color:#8a8576;background:var(--card);border:1px solid var(--border);padding:6px 10px;border-radius:8px}
+
+/* Tabs */
+.tabs{display:flex;gap:8px;margin-bottom:22px;border-bottom:1px solid var(--border);padding-bottom:10px;flex-wrap:wrap}
+.tabs button{font-family:var(--font-body);font-size:12px;font-weight:500;padding:8px 14px;border-radius:9px;border:1px solid transparent;background:transparent;color:#7a7367;cursor:pointer;transition:all .2s ease;position:relative}
+.tabs button:hover{color:var(--fg);border-color:var(--border);background:rgba(212,168,67,0.06)}
+.tabs button.active{color:var(--amber);border-color:rgba(212,168,67,0.35);background:rgba(212,168,67,0.08)}
+.tabs button[aria-selected="true"]{font-weight:600}
+
+/* Cards grid */
+.grid{display:grid;gap:18px;grid-template-columns:repeat(auto-fill,minmax(300px,1fr))}
+@media(max-width:640px){.grid{grid-template-columns:1fr}}
+
+.card{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);padding:22px 24px;box-shadow:var(--shadow);transition:transform .2s ease, box-shadow .3s ease, border-color .3s ease;position:relative;overflow:hidden;cursor:pointer}
+.card:hover{transform:translateY(-3px);box-shadow:var(--shadow-hover);border-color:#d4cfa8}
+.card .label{font-family:var(--font-mono);font-size:10px;text-transform:uppercase;letter-spacing:0.08em;color:#9a9588;margin-bottom:8px;display:block}
+.card h3{font-family:var(--font-display);font-size:20px;font-weight:400;margin:0 0 10px;line-height:1.2}
+.card p{font-size:13.5px;color:#6b6458;margin:0 0 14px}
+.card .chips{display:flex;gap:8px;flex-wrap:wrap;margin-top:6px}
+.chip{font-family:var(--font-mono);font-size:11px;padding:4px 9px;border-radius:20px;border:1px solid var(--border);color:#7a7367;background:rgba(212,168,67,0.07);transition:background .15s ease, border-color .15s ease}
+.card:hover .chip{border-color:rgba(212,168,67,0.4);background:rgba(212,168,67,0.12)}
+
+/* Shimmer skeleton */
+.skeleton{position:relative;overflow:hidden;background:var(--card);border:1px solid var(--border);border-radius:var(--radius);padding:22px 24px}
+.skeleton::before{content:'';position:absolute;inset:0;background:var(--shimmer);background-size:var(--shimmer-size);animation:shimmer 1.6s infinite;opacity:.7;pointer-events:none}
+@keyframes shimmer{0%{background-position:-200% 0}100%{background-position:200% 0}}
+.skeleton .line{height:10px;border-radius:5px;background:linear-gradient(90deg,#d3cdb8,#edeae3,#d3cdb8);background-size:200% 100%;margin:8px 0;animation:shimmer 1.8s infinite;opacity:.55}
+.skeleton .line.wide{width:85%}
+.skeleton .line.medium{width:60%}
+.skeleton .line.narrow{width:40%}
+.skeleton .pill{height:22px;width:80px;border-radius:11px;background:linear-gradient(90deg,#d3cdb8,#edeae3,#d3cdb8);background-size:200% 100%;animation:shimmer 1.8s infinite;opacity:.55;margin-top:14px}
+
+/* Panel panels */
+.panel-row{display:grid;gap:18px;grid-template-columns:repeat(auto-fill,minmax(420px,1fr))}
+@media(max-width:640px){.panel-row{grid-template-columns:1fr}}
+.panel{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);padding:22px 24px;box-shadow:var(--shadow);transition:box-shadow .3s ease, border-color .3s ease}
+.panel:hover{box-shadow:var(--shadow-hover);border-color:#d4cfa8}
+.panel h3{font-family:var(--font-display);font-size:22px;margin:0 0 4px}
+.panel .subtitle{font-size:12px;color:#8a8576;margin-bottom:14px;display:block}
+
+/* Interactive bar / progress */
+.bar{height:8px;border-radius:4px;background:#eceae3;overflow:hidden;margin-top:10px}
+.bar-fill{height:100%;width:72%;border-radius:4px;background:linear-gradient(90deg,var(--amber),#eec882);animation:fillGrow .9s ease-out both}
+@keyframes fillGrow{from{width:0}to{width:72%}}
+
+/* Footer */
+footer{text-align:center;font-family:var(--font-mono);font-size:11px;color:#a09a87;padding-top:30px;border-top:1px solid var(--border);margin-top:8px}
+
+/* Theme toggle */
+.theme-toggle{position:fixed;top:24px;right:24px;z-index:10;background:var(--card);border:1px solid var(--border);border-radius:10px;padding:8px 12px;font-family:var(--font-mono);font-size:11px;cursor:pointer;box-shadow:var(--shadow);transition:background .3s ease, border-color .3s ease}
+.theme-toggle:hover{border-color:var(--amber)}
+.theme-toggle span{color:var(--amber);font-weight:500}
+
+/* Reduced motion */
+@media(prefers-reduced-motion:reduce){*{animation-duration:.01ms!important;transition-duration:.01ms!important}}
+</style>
+</head>
+<body>
+<button class="theme-toggle" onclick="toggleTheme()" aria-label="Toggle theme" title="Toggle light/dark">Mode: <span id="modeLabel">Light</span></button>
+
+<div class="app" role="main">
+  <aside class="sidebar" aria-label="Navigation">
+    <h2>Amfaye</h2>
+    <p>Panel system · Skeleton load · Font scale</p>
+    <nav class="nav" aria-label="Sections">
+      <button class="active" onclick="switchSec(this,'overview')" aria-pressed="true">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>
+        Overview
+      </button>
+      <button onclick="switchSec(this,'panels')" aria-pressed="false">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="6" width="20" height="12" rx="2"/><line x1="2" y1="10" x2="22" y2="10"/><line x1="8" y1="6" x2="8" y2="18"/></svg>
+        Global Panels
+      </button>
+      <button onclick="switchSec(this,'skeleton')" aria-pressed="false">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2v4m0 12v4M4.93 4.93l2.83 2.83m8.48 8.48l2.83 2.83M2 12h4m12 0h4M4.93 19.07l2.83-2.83m8.48-8.48l2.83-2.83"/></svg>
+        Skeleton Load
+      </button>
+    </nav>
+  </aside>
+
+  <main class="main" id="mainContent">
+    <header class="header" id="pageHeader">
+      <h1 id="pageTitle">Overview</h1>
+      <span class="meta">Mockup · Interactive</span>
+    </header>
+
+    <div class="tabs" role="tablist" aria-label="Content tabs" id="tabsArea">
+      <button role="tab" aria-selected="true" onclick="setTab(this,0)">Dashboard</button>
+      <button role="tab" aria-selected="false" onclick="setTab(this,1)">Updates</button>
+      <button role="tab" aria-selected="false" onclick="setTab(this,2)">Settings</button>
+    </div>
+
+    <section aria-label="Cards" id="cardArea">
+      <div class="grid" id="cardGrid">
+        <article class="card" onclick="openCard(this)">
+          <span class="label">Panel 01</span>
+          <h3>Global Animation</h3>
+          <p>Panel enter/exit transitions with staggered easing. Hover lifts the card and highlights chips.</p>
+          <div class="chips"><span class="chip">slide</span><span class="chip">fade</span><span class="chip">scale</span></div>
+        </article>
+        <article class="card" onclick="openCard(this)">
+          <span class="label">Panel 02</span>
+          <h3>Shimmer Skeleton</h3>
+          <p>Skeleton loading with animated gradient. Respects prefers-reduced-motion automatically.</p>
+          <div class="chips"><span class="chip">skeleton</span><span class="chip">load</span><span class="chip">access</span></div>
+        </article>
+        <article class="card" onclick="openCard(this)">
+          <span class="label">Panel 03</span>
+          <h3>Font Scale / Rem</h3>
+          <p>All CSS scaled to rem units with accessibility font control. Theme-aware token palette.</p>
+          <div class="chips"><span class="chip">rem</span><span class="chip">font</span><span class="chip">a11y</span></div>
+        </article>
+      </div>
+    </section>
+
+    <section aria-label="Panel layout" style="margin-top:26px" id="panelArea">
+      <div class="panel-row" id="panelRow"></div>
+    </section>
+
+    <footer>Amfaye-bites-System · Mockup artifact — hover tabs, shimmer skeleton, panel animations</footer>
+  </main>
+</div>
+
+<script>
+/* Theme */
+let dark = false;
+function toggleTheme(){dark=!dark;document.documentElement.setAttribute('data-theme',dark?'dark':'light');document.getElementById('modeLabel').textContent=dark?'Dark':'Light';}
+
+/* Section switch */
+function switchSec(btn, key){
+document.querySelectorAll('.nav button').forEach(b=>{b.classList.remove('active');b.setAttribute('aria-pressed','false');});
+btn.classList.add('active');btn.setAttribute('aria-pressed','true');
+const titles={overview:'Overview',panels:'Global Panels',skeleton:'Skeleton Load'};
+document.getElementById('pageTitle').textContent=titles[key];
+buildContent(key);
+}
+
+/* Tab switch */
+function setTab(btn, idx){
+document.querySelectorAll('.tabs button').forEach(b=>{b.setAttribute('aria-selected','false');b.classList.remove('active')});
+btn.setAttribute('aria-selected','true');btn.classList.add('active');
+buildContent('overview');
+}
+
+/* Build content by section */
+function buildContent(key){
+const grid=document.getElementById('cardGrid');
+const row=document.getElementById('panelRow');
+if(key==='overview'){
+grid.innerHTML=`
+<article class="card" onclick="openCard(this)"><span class="label">Panel 01</span><h3>Global Animation</h3><p>Panel enter/exit transitions with staggered easing. Hover lifts the card and highlights chips.</p><div class="chips"><span class="chip">slide</span><span class="chip">fade</span><span class="chip">scale</span></div></article>
+<article class="card" onclick="openCard(this)"><span class="label">Panel 02</span><h3>Shimmer Skeleton</h3><p>Skeleton loading with animated gradient. Respects prefers-reduced-motion automatically.</p><div class="chips"><span class="chip">skeleton</span><span class="chip">load</span><span class="chip">access</span></div></article>
+<article class="card" onclick="openCard(this)"><span class="label">Panel 03</span><h3>Font Scale / Rem</h3><p>All CSS scaled to rem units with accessibility font control. Theme-aware token palette.</p><div class="chips"><span class="chip">rem</span><span class="chip">font</span><span class="chip">a11y</span></div></article>`;
+row.innerHTML=`
+<div class="panel"><h3>Live Panel</h3><span class="subtitle">Active state with hover lift</span><p>Interactive panel displaying live metrics with animated progress bar.</p><div class="bar"><div class="bar-fill"></div></div></div>
+<div class="panel"><h3>Update Panel</h3><span class="subtitle">Hover to reveal details</span><p>Recent commits and version notes rendered with panel transitions.</p><div class="chips"><span class="chip">v2.1</span><span class="chip">anim</span></div></div>`;
+return;
+}
+if(key==='panels'){
+grid.innerHTML=`
+<article class="card" onclick="openCard(this)"><span class="label">Panel A</span><h3>Entry Animation</h3><p>Staggered entrance with delay per card. Uses CSS keyframes for smooth entry.</p><div class="chips"><span class="chip">stagger</span><span class="chip">ease</span></div></article>
+<article class="card" onclick="openCard(this)"><span class="label">Panel B</span><h3>Exit Transition</h3><p>Graceful fade and slide on close. Keeps layout stable during changes.</p><div class="chips"><span class="chip">fade</span><span class="chip">slide</span></div></article>`;
+row.innerHTML=`
+<div class="panel"><h3>Animation Settings</h3><span class="subtitle">Stagger durations configurable</span><p>Panel transitions support custom easing curves and delay spacing.</p></div>`;
+return;
+}
+if(key==='skeleton'){
+grid.innerHTML=`
+<div class="skeleton"><div class="line wide"></div><div class="line medium"></div><div class="line narrow"></div><div class="pill"></div></div>
+<div class="skeleton"><div class="line wide"></div><div class="line medium"></div><div class="pill"></div></div>`;
+row.innerHTML=`<div class="panel"><h3>Skeleton Load</h3><span class="subtitle">Gradient shimmer with reduced-motion guard</span><p>Skeleton cards animate only when motion is preferred.</p></div>`;
+return;
+}
+}
+
+function openCard(el){
+el.style.transform='scale(0.98)';setTimeout(()=>el.style.transform='',180);}
+
+/* Initialize */
+buildContent('overview');
+</script>
+</body>
+</html>

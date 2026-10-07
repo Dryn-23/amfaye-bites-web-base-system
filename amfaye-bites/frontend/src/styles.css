@@ -630,7 +630,7 @@ select:focus {
 }
 .product-card:hover {
   transform: translateY(-4px);
-  box-shadow: 0 9px 20px #3344210c;
+  box-shadow: 0 12px 32px rgba(212,168,67,0.22), 0 9px 20px #3344210c;
 }
 .product-image {
   padding: 0;
@@ -1549,6 +1549,12 @@ select {
   background: white;
   position: sticky;
   top: 20px;
+  transition: box-shadow 0.25s ease, border-color 0.25s ease, transform 0.2s ease;
+}
+.summary-card:hover {
+  box-shadow: 0 14px 36px rgba(212,168,67,0.14);
+  border-color: rgba(212,168,67,0.35);
+  transform: translateY(-2px);
 }
 .summary-card h3 {
   font-size: 1.8rem;
@@ -1875,6 +1881,12 @@ select {
   padding: 45px 55px;
   gap: 35px;
   margin: 35px 0;
+  transition: box-shadow 0.25s ease, transform 0.2s ease, border-color 0.25s ease;
+}
+.offer-card:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 14px 36px rgba(212,168,67,0.18), 0 6px 18px #3344210c;
+  border-color: rgba(212,168,67,0.35);
 }
 .offer-card > div:first-child {
   max-width: 530px;
@@ -2104,6 +2116,12 @@ select {
   padding: 22px;
   display: flex;
   flex-direction: column;
+  transition: box-shadow 0.25s ease, transform 0.2s ease, border-color 0.25s ease;
+}
+.stat-card:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 14px 36px rgba(212,168,67,0.14);
+  border-color: rgba(212,168,67,0.35);
 }
 .stat-card > div {
   display: flex;
