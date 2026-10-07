@@ -9,7 +9,7 @@
   gap: 18px;
 }
 .appearance-heading .eyebrow {
-  font-size: 8px;
+  font-size: 0.8rem;
   margin-bottom: 8px;
 }
 .appearance-heading h3 {
@@ -26,7 +26,7 @@
   background: var(--light);
   border-radius: 20px;
   padding: 7px 12px;
-  font-size: 10px;
+  font-size: 1.0rem;
   white-space: nowrap;
 }
 .appearance-options {
@@ -144,7 +144,7 @@
   align-items: center;
   gap: 7px;
   color: var(--ink);
-  font-size: 12px;
+  font-size: 1.2rem;
   margin-top: 14px;
 }
 .appearance-check {
@@ -154,14 +154,14 @@
 .appearance-option-description {
   display: block;
   color: var(--muted);
-  font-size: 10px;
+  font-size: 1.0rem;
   line-height: 1.7;
   font-weight: 400;
   margin-top: 7px;
 }
 .appearance-settings .appearance-save-note {
   color: var(--muted);
-  font-size: 10px;
+  font-size: 1.0rem;
   line-height: 1.8;
   margin-bottom: 0;
 }
@@ -181,18 +181,18 @@
     gap: 7px;
   }
   .appearance-option-description {
-    font-size: 9px;
+    font-size: 0.9rem;
   }
   .appearance-heading {
     align-items: flex-start;
     gap: 8px;
   }
   .appearance-current {
-    font-size: 9px;
+    font-size: 0.9rem;
     padding: 6px 9px;
   }
   .appearance-heading .eyebrow {
-    font-size: 7px;
+    font-size: 0.7rem;
   }
 }
 @media (max-width: 380px) {
@@ -684,11 +684,11 @@ html[data-theme="dark"] ::selection {
 }
 .font-accessibility-heading h3 {
   margin: 0;
-  font-size: 14px;
+  font-size: 1.4rem;
 }
 .font-accessibility > p {
   color: var(--muted);
-  font-size: 11px;
+  font-size: 1.1rem;
   margin-top: 6px;
 }
 .font-options {
@@ -720,12 +720,12 @@ html[data-theme="dark"] ::selection {
   font-weight: 600;
   letter-spacing: 0.2px;
 }
-.font-btn-small .font-btn-label { font-size: 13px; }
-.font-btn-medium .font-btn-label { font-size: 17px; }
-.font-btn-large .font-btn-label { font-size: 21px; }
+.font-btn-small .font-btn-label { font-size: 1.3rem; }
+.font-btn-medium .font-btn-label { font-size: 1.7rem; }
+.font-btn-large .font-btn-label { font-size: 2.1rem; }
 .font-btn-desc {
   display: block;
-  font-size: 10px;
+  font-size: 1.0rem;
   color: var(--muted);
   margin-top: 4px;
 }
