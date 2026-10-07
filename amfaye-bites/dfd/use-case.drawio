@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<mxfile host="app.diagrams.net" modified="2026-10-06T07:40:00.000Z" agent="5.0" version="21.6.4" etag="usecase-amfaye" type="device">
+<diagram id="uc" name="Use Case — Visitor / Customer / Staff / Admin" style="overflow=hidden;whiteSpace=wrap;html=1;strokeWidth=0;" version="1">
+<mxGraphModel dx="702" dy="525" grid="1" guides="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="827" pageHeight="1169" math="1" shadow="0">
+<root><mxCell id="0" /><mxCell id="1" parent="0" />
+
+<!-- Title -->
+<mxCell id="t" value="Amfaye Bites — Use Case" style="rounded=1;fillColor=#B86B2F;fontColor=#FFFFFF;fontSize=16;fontStyle=1;" vertex="1" parent="1"><mxGeometry x="20" y="20" width="560" height="45" as="geometry"/></mxCell>
+
+<!-- Actors -->
+<mxCell id="actor_visitor" value="Visitor" style="swimlane;fillColor=#FDF9F0;strokeColor=#DFD6C2;fontSize=12;fontStyle=1;verticalLabelPosition=bottom;verticalAlign=top;labelBackgroundColor=none;spacingLeft=4;" vertex="1" parent="1"><mxGeometry x="40" y="100" width="120" height="70" as="geometry"/></mxCell>
+<mxCell id="actor_customer" value="Customer" style="swimlane;fillColor=#F2EAE3;strokeColor=#B86B2F;fontSize=12;fontStyle=1;verticalLabelPosition=bottom;verticalAlign=top;labelBackgroundColor=none;spacingLeft=4;" vertex="1" parent="1"><mxGeometry x="40" y="220" width="120" height="70" as="geometry"/></mxCell>
+<mxCell id="actor_staff" value="Staff / Cashier" style="swimlane;fillColor=#FDF9F0;strokeColor=#DFD6C2;fontSize=12;fontStyle=1;verticalLabelPosition=bottom;verticalAlign=top;labelBackgroundColor=none;spacingLeft=4;" vertex="1" parent="1"><mxGeometry x="40" y="340" width="120" height="70" as="geometry"/></mxCell>
+<mxCell id="actor_admin" value="Admin" style="swimlane;fillColor=#F2EAE3;strokeColor=#B86B2F;fontSize=12;fontStyle=1;verticalLabelPosition=bottom;verticalAlign=top;labelBackgroundColor=none;spacingLeft=4;" vertex="1" parent="1"><mxGeometry x="40" y="460" width="120" height="70" as="geometry"/></mxCell>
+
+<!-- System Boundary -->
+<mxCell id="system" value="Amfaye Bites System" style="swimlane;fillColor=#EFE9DB;strokeColor=#B86B2F;fontSize=14;fontStyle=1;verticalLabelPosition=top;verticalAlign=bottom;labelBackgroundColor=none;spacingLeft=3;spacingRight=3;startSize=30;endSize=30;" vertex="1" parent="1"><mxGeometry x="200" y="100" width="580" height="440" as="geometry"/></mxCell>
+
+<!-- Use cases inside boundary -->
+<mxCell id="uc_browse" value="Browse menu /\nsearch / categories" style="ellipse;whiteSpace=wrap;fillColor=#FDF9F0;strokeColor=#DFD6C2;fontSize=11;" vertex="1" parent="1"><mxGeometry x="220" y="130" width="140" height="50" as="geometry"/></mxCell>
+<mxCell id="uc_cart" value="Build cart /\ncustomize shake" style="ellipse;whiteSpace=wrap;fillColor=#FDF9F0;strokeColor=#DFD6C2;fontSize=11;" vertex="1" parent="1"><mxGeometry x="380" y="130" width="140" height="50" as="geometry"/></mxCell>
+
+<mxCell id="uc_login" value="Register / Login /\nLogout / Profile" style="ellipse;whiteSpace=wrap;fillColor=#F2EAE3;strokeColor=#B86B2F;fontSize=11;" vertex="1" parent="1"><mxGeometry x="220" y="210" width="140" height="50" as="geometry"/></mxCell>
+<mxCell id="uc_checkout" value="Checkout /\nPromo code\nCash / Demo GCash" style="ellipse;whiteSpace=wrap;fillColor=#F2EAE3;strokeColor=#B86B2F;fontSize=11;" vertex="1" parent="1"><mxGeometry x="380" y="210" width="140" height="50" as="geometry"/></mxCell>
+<mxCell id="uc_order" value="Track orders /\nOrder history" style="ellipse;whiteSpace=wrap;fillColor=#F2EAE3;strokeColor=#B86B2F;fontSize=11;" vertex="1" parent="1"><mxGeometry x="220" y="290" width="140" height="50" as="geometry"/></mxCell>
+
+<mxCell id="uc_pos" value="POS / Search /\nAdd to order\nCollect cash" style="ellipse;whiteSpace=wrap;fillColor=#FDF9F0;strokeColor=#DFD6C2;fontSize=11;" vertex="1" parent="1"><mxGeometry x="220" y="370" width="140" height="50" as="geometry"/></mxCell>
+<mxCell id="uc_inventory" value="Inventory /\nAdjust /\nRecipe / History" style="ellipse;whiteSpace=wrap;fillColor=#FDF9F0;strokeColor=#DFD6C2;fontSize=11;" vertex="1" parent="1"><mxGeometry x="380" y="370" width="140" height="50" as="geometry"/></mxCell>
+
+<mxCell id="uc_admin" value="Dashboard /\nProducts / Categories /\nSales / Reports / Users" style="ellipse;whiteSpace=wrap;fillColor=#EFDCC8;strokeColor=#B86B2F;fontSize=11;" vertex="1" parent="1"><mxGeometry x="220" y="450" width="140" height="60" as="geometry"/></mxCell>
+<mxCell id="uc_settings" value="Settings /\nSecurity / Read-only" style="ellipse;whiteSpace=wrap;fillColor=#EFDCC8;strokeColor=#B86B2F;fontSize=11;" vertex="1" parent="1"><mxGeometry x="380" y="450" width="140" height="60" as="geometry"/></mxCell>
+
+<!-- Edges -->
+<mxCell id="e_vis_browse" value="" style="edgeStyle=orthogonalEdgeStyle;endArrow=classic;startArrow=none;strokeWidth=2;strokeColor=#B86B2F;" edge="1" parent="1" source="actor_visitor" target="uc_browse"><mxGeometry relative="1" as="geometry"/></mxCell>
+<mxCell id="e_vis_cart" value="" style="edgeStyle=orthogonalEdgeStyle;endArrow=classic;strokeWidth=2;strokeColor=#B86B2F;" edge="1" parent="1" source="actor_visitor" target="uc_cart"><mxGeometry relative="1" as="geometry"/></mxCell>
+
+<mxCell id="e_cust_browse" value="" style="edgeStyle=orthogonalEdgeStyle;endArrow=classic;strokeWidth=2;strokeColor=#B86B2F;" edge="1" parent="1" source="actor_customer" target="uc_browse"><mxGeometry relative="1" as="geometry"/></mxCell>
+<mxCell id="e_cust_login" value="" style="edgeStyle=orthogonalEdgeStyle;endArrow=classic;strokeWidth=2;strokeColor=#B86B2F;" edge="1" parent="1" source="actor_customer" target="uc_login"><mxGeometry relative="1" as="geometry"/></mxCell>
+<mxCell id="e_cust_cart" value="" style="edgeStyle=orthogonalEdgeStyle;endArrow=classic;strokeWidth=2;strokeColor=#B86B2F;" edge="1" parent="1" source="actor_customer" target="uc_cart"><mxGeometry relative="1" as="geometry"/></mxCell>
+<mxCell id="e_cust_checkout" value="" style="edgeStyle=orthogonalEdgeStyle;endArrow=classic;strokeWidth=2;strokeColor=#B86B2F;" edge="1" parent="1" source="actor_customer" target="uc_checkout"><mxGeometry relative="1" as="geometry"/></mxCell>
+<mxCell id="e_cust_order" value="" style="edgeStyle=orthogonalEdgeStyle;endArrow=classic;strokeWidth=2;strokeColor=#B86B2F;" edge="1" parent="1" source="actor_customer" target="uc_order"><mxGeometry relative="1" as="geometry"/></mxCell>
+
+<mxCell id="e_staff_pos" value="" style="edgeStyle=orthogonalEdgeStyle;endArrow=classic;strokeWidth=2;strokeColor=#B86B2F;" edge="1" parent="1" source="actor_staff" target="uc_pos"><mxGeometry relative="1" as="geometry"/></mxCell>
+<mxCell id="e_staff_inv" value="" style="edgeStyle=orthogonalEdgeStyle;endArrow=classic;strokeWidth=2;strokeColor=#B86B2F;" edge="1" parent="1" source="actor_staff" target="uc_inventory"><mxGeometry relative="1" as="geometry"/></mxCell>
+
+<mxCell id="e_admin_man" value="" style="edgeStyle=orthogonalEdgeStyle;endArrow=classic;strokeWidth=2;strokeColor=#B86B2F;" edge="1" parent="1" source="actor_admin" target="uc_admin"><mxGeometry relative="1" as="geometry"/></mxCell>
+<mxCell id="e_admin_set" value="" style="edgeStyle=orthogonalEdgeStyle;endArrow=classic;strokeWidth=2;strokeColor=#B86B2F;" edge="1" parent="1" source="actor_admin" target="uc_settings"><mxGeometry relative="1" as="geometry"/></mxCell>
+</root></mxGraphModel></diagram>
+</mxfile>

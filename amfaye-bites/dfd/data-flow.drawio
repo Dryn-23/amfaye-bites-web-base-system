@@ -1,0 +1,172 @@
+<mxfile host="65bd71144e">
+    <diagram id="lvl0" name="Level 0 — System Overview" style="overflow=hidden;whiteSpace=wrap;html=1;strokeWidth=0;" version="1">
+        <mxGraphModel dx="863" dy="292" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="827" pageHeight="1169" math="1" shadow="0">
+            <root>
+                <mxCell id="0"/>
+                <mxCell id="1" parent="0"/>
+                <mxCell id="2" parent="1" style="rounded=1;whiteSpace=wrap;fontStyle=1;fontSize=14;fillColor=#B86B2F;fontColor=#FFFFFF;strokeColor=#B86B2F;" value="Level 0 — System Overview" vertex="1">
+                    <mxGeometry height="40" width="240" x="20" y="20" as="geometry"/>
+                </mxCell>
+                <mxCell id="3" parent="1" style="rounded=1;fillColor=#FDF9F0;strokeColor=#DFD6C2;fontSize=12;" value="Customer Browser" vertex="1">
+                    <mxGeometry height="36" width="160" x="20" y="100" as="geometry"/>
+                </mxCell>
+                <mxCell id="4" parent="1" style="rounded=1;fillColor=#F2EAE3;strokeColor=#B86B2F;fontSize=12;" value="Vercel" vertex="1">
+                    <mxGeometry height="36" width="130" x="280" y="100" as="geometry"/>
+                </mxCell>
+                <mxCell id="5" parent="1" style="rounded=1;fillColor=#F2EAE3;strokeColor=#B86B2F;fontSize=12;" value="Render" vertex="1">
+                    <mxGeometry height="36" width="130" x="480" y="100" as="geometry"/>
+                </mxCell>
+                <mxCell id="6" parent="1" style="rounded=1;fillColor=#EFDCC8;strokeColor=#B86B2F;fontSize=12;" value="MongoDB Atlas" vertex="1">
+                    <mxGeometry height="36" width="160" x="680" y="100" as="geometry"/>
+                </mxCell>
+                <mxCell id="e1" edge="1" parent="1" source="3" style="edgeStyle=orthogonalEdgeStyle;startArrow=none;endArrow=classic;strokeWidth=2;strokeColor=#B86B2F;" target="4" value="">
+                    <mxGeometry relative="1" as="geometry"/>
+                </mxCell>
+                <mxCell id="e2" edge="1" parent="1" source="4" style="edgeStyle=orthogonalEdgeStyle;startArrow=none;endArrow=classic;strokeWidth=2;strokeColor=#B86B2F;" target="5" value="">
+                    <mxGeometry relative="1" as="geometry"/>
+                </mxCell>
+                <mxCell id="e3" edge="1" parent="1" source="5" style="edgeStyle=orthogonalEdgeStyle;startArrow=none;endArrow=classic;strokeWidth=2;strokeColor=#B86B2F;" target="6" value="">
+                    <mxGeometry relative="1" as="geometry"/>
+                </mxCell>
+            </root>
+        </mxGraphModel>
+    </diagram>
+    <diagram id="lvl1" name="Level 1 — Subsystem Flows" style="overflow=hidden;whiteSpace=wrap;html=1;strokeWidth=0;" version="1">
+        <mxGraphModel dx="863" dy="292" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="827" pageHeight="1169" math="1" shadow="0">
+            <root>
+                <mxCell id="0"/>
+                <mxCell id="1" parent="0"/>
+                <mxCell id="a" parent="1" style="rounded=1;fillColor=#B86B2F;fontColor=#FFFFFF;fontSize=14;" value="Level 1 — Subsystem Flows" vertex="1">
+                    <mxGeometry height="40" width="300" x="20" y="20" as="geometry"/>
+                </mxCell>
+                <mxCell id="b" parent="1" style="rounded=1;fillColor=#FDF9F0;strokeColor=#DFD6C2;" value="Customer" vertex="1">
+                    <mxGeometry height="36" width="140" x="20" y="100" as="geometry"/>
+                </mxCell>
+                <mxCell id="c" parent="1" style="rounded=1;fillColor=#F2EAE3;strokeColor=#B86B2F;" value="Order Service" vertex="1">
+                    <mxGeometry height="36" width="140" x="220" y="100" as="geometry"/>
+                </mxCell>
+                <mxCell id="d" parent="1" style="rounded=1;fillColor=#FDF9F0;strokeColor=#DFD6C2;" value="Staff / Admin" vertex="1">
+                    <mxGeometry height="36" width="140" x="20" y="180" as="geometry"/>
+                </mxCell>
+                <mxCell id="e" parent="1" style="rounded=1;fillColor=#F2EAE3;strokeColor=#B86B2F;" value="Admin Services" vertex="1">
+                    <mxGeometry height="36" width="140" x="220" y="180" as="geometry"/>
+                </mxCell>
+                <mxCell id="f" parent="1" style="rounded=1;fillColor=#EFDCC8;strokeColor=#B86B2F;" value="MongoDB Atlas" vertex="1">
+                    <mxGeometry height="36" width="160" x="500" y="140" as="geometry"/>
+                </mxCell>
+                <mxCell id="eb1" edge="1" parent="1" source="b" style="edgeStyle=orthogonalEdgeStyle;endArrow=classic;strokeWidth=2;strokeColor=#B86B2F;" target="c" value="">
+                    <mxGeometry relative="1" as="geometry"/>
+                </mxCell>
+                <mxCell id="eb2" edge="1" parent="1" source="c" style="edgeStyle=orthogonalEdgeStyle;endArrow=classic;strokeWidth=2;strokeColor=#B86B2F;" target="f" value="">
+                    <mxGeometry relative="1" as="geometry"/>
+                </mxCell>
+                <mxCell id="eb3" edge="1" parent="1" source="d" style="edgeStyle=orthogonalEdgeStyle;endArrow=classic;strokeWidth=2;strokeColor=#B86B2F;" target="e" value="">
+                    <mxGeometry relative="1" as="geometry"/>
+                </mxCell>
+                <mxCell id="eb4" edge="1" parent="1" source="e" style="edgeStyle=orthogonalEdgeStyle;endArrow=classic;strokeWidth=2;strokeColor=#B86B2F;" target="f" value="">
+                    <mxGeometry relative="1" as="geometry"/>
+                </mxCell>
+            </root>
+        </mxGraphModel>
+    </diagram>
+    <diagram id="lvl2" name="Level 2 — Component Flow" style="overflow=hidden;whiteSpace=wrap;html=1;strokeWidth=0;" version="1">
+        <mxGraphModel dx="777" dy="263" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="827" pageHeight="1169" math="1" shadow="0">
+            <root>
+                <mxCell id="0"/>
+                <mxCell id="1" parent="0"/>
+                <mxCell id="t" parent="1" style="rounded=1;fillColor=#B86B2F;fontColor=#FFFFFF;fontSize=14;" value="Level 2 — Component Flow" vertex="1">
+                    <mxGeometry height="40" width="320" x="20" y="20" as="geometry"/>
+                </mxCell>
+                <mxCell id="t1" parent="1" style="rounded=1;fillColor=#FDF9F0;strokeColor=#DFD6C2;" value="Browser / /api/orders" vertex="1">
+                    <mxGeometry height="36" width="140" x="20" y="100" as="geometry"/>
+                </mxCell>
+                <mxCell id="t2" parent="1" style="rounded=1;fillColor=#F2EAE3;strokeColor=#B86B2F;" value="Router" vertex="1">
+                    <mxGeometry height="36" width="90" x="180" y="100" as="geometry"/>
+                </mxCell>
+                <mxCell id="t3" parent="1" style="rounded=1;fillColor=#F2EAE3;strokeColor=#B86B2F;" value="Auth Middleware" vertex="1">
+                    <mxGeometry height="36" width="120" x="300" y="100" as="geometry"/>
+                </mxCell>
+                <mxCell id="t4" parent="1" style="rounded=1;fillColor=#EFDCC8;strokeColor=#B86B2F;" value="Order Controller" vertex="1">
+                    <mxGeometry height="36" width="130" x="450" y="100" as="geometry"/>
+                </mxCell>
+                <mxCell id="t5" parent="1" style="rounded=1;fillColor=#F2EAE3;strokeColor=#B86B2F;" value="Order Service" vertex="1">
+                    <mxGeometry height="36" width="120" x="20" y="160" as="geometry"/>
+                </mxCell>
+                <mxCell id="t6" parent="1" style="rounded=1;fillColor=#F2EAE3;strokeColor=#B86B2F;" value="Order Model" vertex="1">
+                    <mxGeometry height="36" width="120" x="160" y="160" as="geometry"/>
+                </mxCell>
+                <mxCell id="t7" parent="1" style="rounded=1;fillColor=#EFDCC8;strokeColor=#B86B2F;" value="MongoDB Transaction" vertex="1">
+                    <mxGeometry height="36" width="140" x="300" y="160" as="geometry"/>
+                </mxCell>
+                <mxCell id="t8" parent="1" style="rounded=1;fillColor=#FDF9F0;strokeColor=#DFD6C2;" value="Inventory / Payment" vertex="1">
+                    <mxGeometry height="36" width="140" x="460" y="160" as="geometry"/>
+                </mxCell>
+                <mxCell id="et1" edge="1" parent="1" source="t1" style="edgeStyle=orthogonalEdgeStyle;endArrow=classic;strokeWidth=2;strokeColor=#B86B2F;" target="t2" value="">
+                    <mxGeometry relative="1" as="geometry"/>
+                </mxCell>
+                <mxCell id="et2" edge="1" parent="1" source="t2" style="edgeStyle=orthogonalEdgeStyle;endArrow=classic;strokeWidth=2;strokeColor=#B86B2F;" target="t3" value="">
+                    <mxGeometry relative="1" as="geometry"/>
+                </mxCell>
+                <mxCell id="et3" edge="1" parent="1" source="t3" style="edgeStyle=orthogonalEdgeStyle;endArrow=classic;strokeWidth=2;strokeColor=#B86B2F;" target="t4" value="">
+                    <mxGeometry relative="1" as="geometry"/>
+                </mxCell>
+                <mxCell id="et4" edge="1" parent="1" source="t4" style="edgeStyle=orthogonalEdgeStyle;endArrow=classic;strokeWidth=2;strokeColor=#B86B2F;" target="t5" value="">
+                    <mxGeometry relative="1" as="geometry"/>
+                </mxCell>
+                <mxCell id="et5" edge="1" parent="1" source="t5" style="edgeStyle=orthogonalEdgeStyle;endArrow=classic;strokeWidth=2;strokeColor=#B86B2F;" target="t6" value="">
+                    <mxGeometry relative="1" as="geometry"/>
+                </mxCell>
+                <mxCell id="et6" edge="1" parent="1" source="t6" style="edgeStyle=orthogonalEdgeStyle;endArrow=classic;strokeWidth=2;strokeColor=#B86B2F;" target="t7" value="">
+                    <mxGeometry relative="1" as="geometry"/>
+                </mxCell>
+                <mxCell id="et7" edge="1" parent="1" source="t7" style="edgeStyle=orthogonalEdgeStyle;endArrow=classic;strokeWidth=2;strokeColor=#B86B2F;" target="t8" value="">
+                    <mxGeometry relative="1" as="geometry"/>
+                </mxCell>
+            </root>
+        </mxGraphModel>
+    </diagram>
+    <diagram id="lvl3" name="Level 3 — Detailed Transaction" style="overflow=hidden;whiteSpace=wrap;html=1;strokeWidth=0;" version="1">
+        <mxGraphModel dx="777" dy="263" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="827" pageHeight="1169" math="1" shadow="0">
+            <root>
+                <mxCell id="0"/>
+                <mxCell id="1" parent="0"/>
+                <mxCell id="u" parent="1" style="rounded=1;fillColor=#B86B2F;fontColor=#FFFFFF;fontSize=14;" value="Level 3 — Detailed Transaction" vertex="1">
+                    <mxGeometry height="40" width="340" x="20" y="20" as="geometry"/>
+                </mxCell>
+                <mxCell id="u1" parent="1" style="rounded=1;fillColor=#FDF9F0;strokeColor=#DFD6C2;" value="POST /orders" vertex="1">
+                    <mxGeometry height="36" width="120" x="20" y="100" as="geometry"/>
+                </mxCell>
+                <mxCell id="u2" parent="1" style="rounded=1;fillColor=#F2EAE3;strokeColor=#B86B2F;" value="Validate" vertex="1">
+                    <mxGeometry height="36" width="110" x="160" y="100" as="geometry"/>
+                </mxCell>
+                <mxCell id="u3" parent="1" style="rounded=1;fillColor=#F2EAE3;strokeColor=#B86B2F;" value="Lock" vertex="1">
+                    <mxGeometry height="36" width="80" x="290" y="100" as="geometry"/>
+                </mxCell>
+                <mxCell id="u4" parent="1" style="rounded=1;fillColor=#F2EAE3;strokeColor=#B86B2F;" value="Deduct" vertex="1">
+                    <mxGeometry height="36" width="100" x="390" y="100" as="geometry"/>
+                </mxCell>
+                <mxCell id="u5" parent="1" style="rounded=1;fillColor=#EFDCC8;strokeColor=#B86B2F;" value="Pay" vertex="1">
+                    <mxGeometry height="36" width="100" x="510" y="100" as="geometry"/>
+                </mxCell>
+                <mxCell id="u6" parent="1" style="rounded=1;fillColor=#EFDCC8;strokeColor=#B86B2F;" value="Update Status" vertex="1">
+                    <mxGeometry height="36" width="140" x="640" y="100" as="geometry"/>
+                </mxCell>
+                <mxCell id="ue1" edge="1" parent="1" source="u1" style="edgeStyle=orthogonalEdgeStyle;endArrow=classic;strokeWidth=2;strokeColor=#B86B2F;" target="u2" value="">
+                    <mxGeometry relative="1" as="geometry"/>
+                </mxCell>
+                <mxCell id="ue2" edge="1" parent="1" source="u2" style="edgeStyle=orthogonalEdgeStyle;endArrow=classic;strokeWidth=2;strokeColor=#B86B2F;" target="u3" value="">
+                    <mxGeometry relative="1" as="geometry"/>
+                </mxCell>
+                <mxCell id="ue3" edge="1" parent="1" source="u3" style="edgeStyle=orthogonalEdgeStyle;endArrow=classic;strokeWidth=2;strokeColor=#B86B2F;" target="u4" value="">
+                    <mxGeometry relative="1" as="geometry"/>
+                </mxCell>
+                <mxCell id="ue4" edge="1" parent="1" source="u4" style="edgeStyle=orthogonalEdgeStyle;endArrow=classic;strokeWidth=2;strokeColor=#B86B2F;" target="u5" value="">
+                    <mxGeometry relative="1" as="geometry"/>
+                </mxCell>
+                <mxCell id="ue5" edge="1" parent="1" source="u5" style="edgeStyle=orthogonalEdgeStyle;endArrow=classic;strokeWidth=2;strokeColor=#B86B2F;" target="u6" value="">
+                    <mxGeometry relative="1" as="geometry"/>
+                </mxCell>
+            </root>
+        </mxGraphModel>
+    </diagram>
+</mxfile>

@@ -671,3 +671,65 @@ html[data-theme="dark"] ::selection {
     color: black !important;
   }
 }
+.font-accessibility {
+  margin-top: 28px;
+  padding-top: 18px;
+  border-top: 1px solid var(--line);
+}
+.font-accessibility-heading {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  color: var(--ink);
+}
+.font-accessibility-heading h3 {
+  margin: 0;
+  font-size: 14px;
+}
+.font-accessibility > p {
+  color: var(--muted);
+  font-size: 11px;
+  margin-top: 6px;
+}
+.font-options {
+  display: flex;
+  gap: 10px;
+  margin-top: 12px;
+  padding: 0;
+  border: 0;
+}
+.font-btn {
+  flex: 1;
+  padding: 12px 14px;
+  border-radius: 10px;
+  border: 1.5px solid var(--line);
+  background: var(--cream);
+  text-align: left;
+  cursor: pointer;
+  transition: border-color 0.15s, box-shadow 0.15s;
+}
+.font-btn:hover {
+  border-color: var(--green);
+}
+.font-btn.is-selected {
+  border-color: var(--green);
+  box-shadow: 0 0 0 1.5px var(--green);
+}
+.font-btn-label {
+  display: block;
+  font-weight: 600;
+  letter-spacing: 0.2px;
+}
+.font-btn-small .font-btn-label { font-size: 13px; }
+.font-btn-medium .font-btn-label { font-size: 17px; }
+.font-btn-large .font-btn-label { font-size: 21px; }
+.font-btn-desc {
+  display: block;
+  font-size: 10px;
+  color: var(--muted);
+  margin-top: 4px;
+}
+@media (max-width: 600px) {
+  .font-options { flex-direction: column; }
+  .font-btn { width: 100%; }
+}

@@ -1,5 +1,5 @@
 import { useId } from "react";
-import { Sun, Moon, Monitor, Check } from "lucide-react";
+import { Sun, Moon, Monitor, Check, Eye } from "lucide-react";
 import { useTheme } from "../context/ThemeContext";
 const options = [
   {
@@ -22,7 +22,7 @@ const options = [
   },
 ];
 export default function AppearanceSettings() {
-  const { preference, theme, selectPreference, storageError } = useTheme();
+  const { preference, theme, selectPreference, storageError, fontSize, selectFontSize } = useTheme();
   const id = useId();
   return (
     <section className="panel appearance-settings" aria-labelledby={id}>
@@ -83,6 +83,46 @@ export default function AppearanceSettings() {
           ? "Applied for this visit. Browser storage is unavailable, so this choice may not survive a reload."
           : "Saved automatically on this browser. This changes your view only, not other users' screens."}
       </p>
+
+      <section className="font-accessibility" aria-labelledby={id + "-font"}>
+        <div className="font-accessibility-heading">
+          <Eye size={16} aria-hidden="true" />
+          <h3 id={id + "-font"}>Font Size</h3>
+        </div>
+        <p>
+          For guests with blurry or tired eyes. Pick a comfortable
+          reading size — everything on this browser scales to match.
+        </p>
+        <fieldset className="font-options">
+          <legend className="appearance-sr-only">Font size</legend>
+          {[
+            { value: "small", label: "Small", text: "Current size" },
+            { value: "medium", label: "Medium", text: "Larger" },
+            { value: "large", label: "Large", text: "Largest" },
+          ].map(({ value, label, text }) => (
+            <button
+              key={value}
+              type="button"
+              className={`font-btn ${fontSize === value ? "is-selected" : ""}`}
+              onClick={() => selectFontSize(value)}
+              aria-pressed={fontSize === value}
+            >
+              <span className={`font-btn-label font-btn-${value}`} aria-hidden="true">
+                {label}
+              </span>
+              <span className="font-btn-desc">
+                {text}
+                {fontSize === value && (
+                  <Check size={13} className="appearance-check" />
+                )}
+              </span>
+            </button>
+          ))}
+        </fieldset>
+        <p className="appearance-save-note" role="status">
+          Saved automatically on this browser, like the theme above.
+        </p>
+      </section>
     </section>
   );
 }
