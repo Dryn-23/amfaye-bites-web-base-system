@@ -19,13 +19,15 @@ export default function Settings() {
           <p>Appearance, business information and system configuration.</p>
         </div>
       </div>
-      <AppearanceSettings />
+      <section className="panel-enter">
+        <AppearanceSettings />
+      </section>
       {error ? (
         <div className="error">{error}</div>
       ) : !data ? (
         <Loading />
       ) : (
-        <section className="panel narrow">
+        <section className="panel narrow panel-swap">
           <h3>Business & system</h3>
           {Object.entries(data).map(([k, v]) => (
             <div className="summary-line" key={k}>

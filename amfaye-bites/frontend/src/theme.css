@@ -733,3 +733,17 @@ html[data-theme="dark"] ::selection {
   .font-options { flex-direction: column; }
   .font-btn { width: 100%; }
 }
+@keyframes panelFadeUp {
+  from { opacity: 0; transform: translateY(12px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+@keyframes panelFadeSwap {
+  from { opacity: 0; transform: translateY(8px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+.panel-enter {
+  animation: panelFadeUp 0.45s ease-out both;
+}
+.panel-swap {
+  animation: panelFadeSwap 0.35s ease-in-out both;
+}
