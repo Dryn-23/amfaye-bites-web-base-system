@@ -13,7 +13,7 @@ import { useState, useEffect } from "react";
 import { api } from "../services/api";
 import ProductCard from "../components/ProductCard";
 import ProductModal from "../components/ProductModal";
-import Loading from "../components/Loading";
+import LoadingSkeleton from "../components/LoadingSkeleton";
 import FlashSale from "../components/FlashSale";
 import BundleDeals from "../components/BundleDeals";
 export default function Home() {
@@ -204,7 +204,7 @@ export default function Home() {
             {error} <button onClick={() => location.reload()}>Try again</button>
           </div>
         ) : loading ? (
-          <Loading />
+          <LoadingSkeleton type="list" count={3} />
         ) : (
           <div className="product-grid">
             {picks

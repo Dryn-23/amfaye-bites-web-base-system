@@ -4,7 +4,7 @@ import { Search, X, SlidersHorizontal } from "lucide-react";
 import { api } from "../services/api";
 import ProductCard from "../components/ProductCard";
 import ProductModal from "../components/ProductModal";
-import Loading from "../components/Loading";
+import LoadingSkeleton from "../components/LoadingSkeleton";
 import EmptyState from "../components/EmptyState";
 export default function Menu() {
   const [params, setParams] = useSearchParams();
@@ -103,7 +103,7 @@ export default function Menu() {
       {error ? (
         <div className="error">{error}</div>
       ) : loading ? (
-        <Loading />
+        <LoadingSkeleton type="list" count={3} />
       ) : filtered.length ? (
         <div className="product-grid">
           {filtered.map((p) => (

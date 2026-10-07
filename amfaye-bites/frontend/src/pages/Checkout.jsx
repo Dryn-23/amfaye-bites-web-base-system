@@ -8,7 +8,7 @@ import { api } from "../services/api";
 import { money } from "../utils/currency";
 import DemoPayment from "../components/DemoPayment";
 import EmptyState from "../components/EmptyState";
-import Loading from "../components/Loading";
+import LoadingSkeleton from "../components/LoadingSkeleton";
 
 const DELIVERY_FEE = 50;
 const VAT_RATE = 0.12; // 12% Philippine VAT — must match backend VAT_RATE
@@ -112,7 +112,7 @@ export default function Checkout() {
     }
   }
 
-  if (cart.loading) return <Loading />;
+  if (cart.loading) return <LoadingSkeleton type="list" count={3} />;
 
   if (!cart.items.length) {
     return (

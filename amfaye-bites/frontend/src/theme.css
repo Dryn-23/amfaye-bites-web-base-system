@@ -747,3 +747,27 @@ html[data-theme="dark"] ::selection {
 .panel-swap {
   animation: panelFadeSwap 0.35s ease-in-out both;
 }
+/* Skeleton loading styles */
+.skeleton {
+  background: linear-gradient(90deg, var(--light) 25%, #ece3d0 50%, var(--light) 75%);
+  background-size: 200% 100%;
+  animation: shimmer 1.2s infinite linear;
+  border-radius: 6px;
+}
+@keyframes shimmer {
+  0% { background-position: 200% 0; }
+  100% { background-position: -200% 0; }
+}
+.skeleton-card {
+  height: 140px;
+}
+.skeleton-title {
+  height: 16px;
+  width: 40%;
+  margin-bottom: 12px;
+}
+.skeleton-text {
+  height: 10px;
+  width: 85%;
+  margin-bottom: 8px;
+}

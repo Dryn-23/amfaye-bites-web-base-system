@@ -1,7 +1,7 @@
 import AppearanceSettings from "../../components/AppearanceSettings";
 import { useState, useEffect } from "react";
 import { api } from "../../services/api";
-import Loading from "../../components/Loading";
+import LoadingSkeleton from "../../components/LoadingSkeleton";
 export default function Settings() {
   const [data, setData] = useState(null);
   const [error, setError] = useState("");
@@ -25,7 +25,7 @@ export default function Settings() {
       {error ? (
         <div className="error">{error}</div>
       ) : !data ? (
-        <Loading />
+        <LoadingSkeleton type="list" count={3} />
       ) : (
         <section className="panel narrow panel-swap">
           <h3>Business & system</h3>

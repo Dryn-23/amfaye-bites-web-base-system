@@ -4,10 +4,10 @@ import { useCart } from "../context/CartContext";
 import { money } from "../utils/currency";
 import CartItems from "../components/Cart";
 import EmptyState from "../components/EmptyState";
-import Loading from "../components/Loading";
+import LoadingSkeleton from "../components/LoadingSkeleton";
 export default function Cart() {
   const cart = useCart();
-  if (cart.loading) return <Loading />;
+  if (cart.loading) return <LoadingSkeleton type="list" count={3} />;
   return (
     <div className="container page">
       <div className="page-heading">
