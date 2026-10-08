@@ -156,7 +156,7 @@ export default function Analytics() {
 
           {/* Sales Trend Chart */}
           <div className="panel">
-            <h3>📈 Sales Trend</h3>
+            <h3>Sales Trend</h3>
             <small className="muted">Daily revenue over time</small>
             {data.sales.daily.length > 0 ? (
               <SalesChart daily={data.sales.daily} />
@@ -170,7 +170,7 @@ export default function Analytics() {
           <div className="dashboard-grid">
             {/* Product Distribution */}
             <section className="panel">
-              <h3>🥧 Product Distribution</h3>
+              <h3>Product Distribution</h3>
               <small className="muted">Top 10 products by quantity sold</small>
               {data.products.length > 0 ? (
                 <ProductPieChart products={data.products} />
@@ -183,7 +183,7 @@ export default function Analytics() {
 
             {/* Category Performance */}
             <section className="panel">
-              <h3>📊 Category Performance</h3>
+              <h3>Category Performance</h3>
               <small className="muted">Revenue and quantity by category</small>
               {data.categories.length > 0 ? (
                 <CategoryBarChart categoryData={data.categories} />
@@ -198,7 +198,7 @@ export default function Analytics() {
           <div className="dashboard-grid">
             {/* Peak Hours */}
             <section className="panel">
-              <h3>🕐 Peak Hours Analysis</h3>
+              <h3>Peak Hours Analysis</h3>
               <small className="muted">Orders by hour of day</small>
               <div style={{ marginTop: "20px" }}>
                 {data.peakHours.length > 0 ? (
@@ -223,7 +223,7 @@ export default function Analytics() {
 
             {/* Payment Methods */}
             <section className="panel">
-              <h3>💳 Payment Methods</h3>
+              <h3>Payment Methods</h3>
               <small className="muted">Revenue by payment type</small>
               <div style={{ marginTop: "20px" }}>
                 {data.paymentMethods.length > 0 ? (
@@ -246,7 +246,7 @@ export default function Analytics() {
 
           {/* Monthly Comparison */}
           <div className="panel">
-            <h3>📅 Year-to-Date Monthly Comparison</h3>
+            <h3>Year-to-Date Monthly Comparison</h3>
             <small className="muted">Current year performance by month</small>
             <div className="bar-chart" style={{ marginTop: "20px" }}>
               {data.monthly.length > 0 ? (
@@ -274,7 +274,7 @@ export default function Analytics() {
 
           {/* Top Products Table */}
           <div className="panel">
-            <h3>🏆 Top Performing Products</h3>
+            <h3>Top Performing Products</h3>
             <div className="table-wrap">
               <table>
                 <thead>
