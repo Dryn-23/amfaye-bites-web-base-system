@@ -1,12 +1,13 @@
 import { useState } from "react";
-import { Link } from "react-router-dom";
+import { Link, useSearchParams } from "react-router-dom";
 import { ShieldAlert, Camera, Ticket, CheckCircle } from "lucide-react";
 import { api } from "../services/api";
 
 const ISSUES = ["Insects / Pest", "Mold / Spoilage", "Damaged / Crushed", "Wrong Item", "Allergen / Health", "Other"];
 
 export default function QualityComplaint() {
-  const [form, setForm] = useState({ order: "", orderNumber: "", issueType: ISSUES[0], description: "", photo: "" });
+  const [searchParams] = useSearchParams();
+  const [form, setForm] = useState({ order: searchParams.get("order") || "", orderNumber: "", issueType: ISSUES[0], description: "", photo: "" });
   const [error, setError] = useState("");
   const [result, setResult] = useState(null);
   const [sending, setSending] = useState(false);
