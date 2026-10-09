@@ -22,6 +22,7 @@ import {
 } from "lucide-react";
 import { Logo } from "./Navbar";
 import { useAuth } from "../context/AuthContext";
+
 const links = [
   ["", "Dashboard", LayoutDashboard],
   ["pos", "Point of sale", Monitor],
@@ -38,17 +39,26 @@ const links = [
   ["users", "Users", UserCog],
   ["settings", "Settings", Settings],
 ];
-export default function Sidebar() {
+
+export default function Sidebar({ onClose }) {
   const { user, logout } = useAuth();
   const navigate = useNavigate();
+
+  // One handler on <nav> closes the drawer when ANY link inside is tapped,
+  // including PreparationNavLink, ReviewNavLink and ChatNavLink.
+  const closeOnLinkClick = (e) => {
+    if (e.target.closest("a")) onClose?.();
+  };
+
   return (
-    <aside className="sidebar">
+    <aside className="sidebar" id="admin-sidebar">
       <Logo />
       <span className="sidebar-caption">YOUR BUSINESS, AT A GLANCE</span>
-      <nav>
-<PreparationNavLink />
-<ReviewNavLink />
-<ChatNavLink staff />
+
+      <nav onClick={closeOnLinkClick}>
+        <PreparationNavLink />
+        <ReviewNavLink />
+        <ChatNavLink staff />
         {links
           .filter(
             ([path]) =>
@@ -62,8 +72,9 @@ export default function Sidebar() {
             </NavLink>
           ))}
       </nav>
+
       <div className="sidebar-bottom">
-        <Link to="/">
+        <Link to="/" onClick={onClose}>
           View storefront <ArrowUpRight size={16} />
         </Link>
         <div className="staff-info">
@@ -76,6 +87,7 @@ export default function Sidebar() {
         <button
           className="text-button"
           onClick={async () => {
+            onClose?.();
             await logout();
             navigate("/login");
           }}
