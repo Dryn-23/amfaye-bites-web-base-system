@@ -19,6 +19,7 @@ import {
   Settings,
   LogOut,
   ArrowUpRight,
+  ShieldAlert,
 } from "lucide-react";
 import { Logo } from "./Navbar";
 import { useAuth } from "../context/AuthContext";
@@ -58,6 +59,10 @@ export default function Sidebar({ onClose }) {
       <nav onClick={closeOnLinkClick}>
         <PreparationNavLink />
         <ReviewNavLink />
+        <NavLink to="/quality-reports">
+          <ShieldAlert size={18} />
+          Refunds
+        </NavLink>
         <ChatNavLink staff />
         {links
           .filter(
