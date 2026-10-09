@@ -125,6 +125,21 @@ export default function Reports({ salesOnly = false }) {
               <small>Estimated output tax</small>
             </div>
             <div className="stat-card">
+              <span>Refunded orders</span>
+              <strong>{data.refundedCount || 0}</strong>
+              <small>Confirmed refunds (voided payments)</small>
+            </div>
+            <div className="stat-card">
+              <span>Refunded amount</span>
+              <strong>{money(data.refundedAmount || 0)}</strong>
+              <small>Money returned to customers</small>
+            </div>
+            <div className="stat-card">
+              <span>Net after refunds</span>
+              <strong>{money((data.summary.revenue || 0) - (data.refundedAmount || 0))}</strong>
+              <small>Revenue minus refunds</small>
+            </div>
+            <div className="stat-card">
               <span>Discounts given</span>
               <strong>{money(data.summary.discount)}</strong>
               <small>A little extra happy</small>

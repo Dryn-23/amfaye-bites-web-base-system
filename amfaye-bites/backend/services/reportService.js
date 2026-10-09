@@ -50,10 +50,16 @@ export async function sales(query) {
     },
     { $sort: { _id: 1 } },
   ]);
+  const [refundAgg] = await Sale.aggregate([
+    { $match: { voided: true, ...dates(query) } },
+    { $group: { _id: null, refundedCount: { $sum: 1 }, refundedAmount: { $sum: "$amount" } } },
+  ]);
   return {
     entries,
     summary: summary || { revenue: 0, discount: 0, vat: 0, count: 0 },
     daily,
+    refundedCount: refundAgg?.refundedCount || 0,
+    refundedAmount: refundAgg?.refundedAmount || 0,
   };
 }
 export async function products(query) {
