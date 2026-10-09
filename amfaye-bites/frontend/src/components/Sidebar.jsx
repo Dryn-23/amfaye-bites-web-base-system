@@ -59,10 +59,12 @@ export default function Sidebar({ onClose }) {
       <nav onClick={closeOnLinkClick}>
         <PreparationNavLink />
         <ReviewNavLink />
-        <NavLink to="/quality-reports">
-          <ShieldAlert size={18} />
-          Refunds
-        </NavLink>
+        {user.role !== "customer" && (
+          <NavLink to="/quality-reports">
+            <ShieldAlert size={18} />
+            Refunds
+          </NavLink>
+        )}
         <ChatNavLink staff />
         {links
           .filter(

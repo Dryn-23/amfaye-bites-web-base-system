@@ -157,7 +157,7 @@ export default function App() {
         <Route index element={<AdminHome />} />
         <Route path="messages/:chatId?" element={<ProtectedRoute roles={["admin"]}><Messages /></ProtectedRoute>} />
 <Route path="reviews" element={<ProtectedRoute roles={["admin"]}><ManageReviews /></ProtectedRoute>} />
-        <Route path="quality-reports" element={<ProtectedRoute roles={["admin","staff"]}><QualityReports /></ProtectedRoute>} />
+        <Route path="quality-reports" element={<ProtectedRoute roles={["admin","cashier"]}><QualityReports /></ProtectedRoute>} />
 <Route path="preparation" element={<ProtectedRoute roles={["admin", "cashier"]}><PreparationQueue /></ProtectedRoute>} />
 <Route path="pos" element={<POS />} />
         <Route path="orders" element={<Orders />} />
