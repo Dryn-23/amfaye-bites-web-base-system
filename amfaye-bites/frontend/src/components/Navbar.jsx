@@ -33,17 +33,20 @@ export default function Navbar() {
   const { user } = useAuth();
   return (
     <>
-      <div className="announcement">
-        A little sweetness. A little freshness. A whole lot of happiness.{" "}
-        <span>
-          Made fresh, just for you <Sprout size={13} />
-        </span>
-      </div>
       <header className="header">
         <div className="nav-wrap">
           <Logo />
+          <button
+            className="icon-btn mobile-toggle"
+            aria-label="Toggle navigation"
+            aria-expanded={open}
+            onClick={() => setOpen((v) => !v)}
+          >
+            {open ? <X /> : <MenuIcon />}
+          </button>
           <nav
             className={open ? "main-nav open" : "main-nav"}
+            aria-label="Main"
             onClick={() => setOpen(false)}
           >
             <NavLink to="/" end>
@@ -74,13 +77,6 @@ export default function Navbar() {
             <Link to="/menu" className="button small nav-order">
               Order now <ArrowUpRight size={16} />
             </Link>
-            <button
-              className="icon-btn mobile-toggle"
-              aria-label="Toggle navigation"
-              onClick={() => setOpen(!open)}
-            >
-              {open ? <X /> : <MenuIcon />}
-            </button>
           </div>
         </div>
       </header>

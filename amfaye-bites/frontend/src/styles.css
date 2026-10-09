@@ -3079,7 +3079,7 @@ td .text-link {
   .main-nav.open {
     display: flex;
     position: absolute;
-    top: 75px;
+    top: 87px;
     left: 0;
     right: 0;
     background: var(--cream);
