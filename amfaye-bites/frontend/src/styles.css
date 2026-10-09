@@ -4129,3 +4129,15 @@ td .text-link {
     display: none;
   }
 }
+
+@media (max-width: 800px) {
+  .nav-wrap {
+    justify-content: flex-start;
+  }
+  .nav-actions {
+    margin-left: auto;   /* push user + cart to the right */
+  }
+  .mobile-toggle {
+    order: 3;            /* burger goes after the cart, at the far right */
+  }
+}
