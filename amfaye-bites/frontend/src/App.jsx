@@ -4,7 +4,7 @@ import Reviews from "./pages/Reviews";
 import Messages from "./pages/Messages";
 import { useState, useEffect } from "react";
 import { Routes, Route, Outlet, useLocation, Navigate } from "react-router-dom";
-import Navbar from "./components/Navbar";
+import Navbar, { Logo } from "./components/Navbar";
 import Footer from "./components/Footer";
 import Sidebar from "./components/Sidebar";
 import ProtectedRoute from "./components/ProtectedRoute";
