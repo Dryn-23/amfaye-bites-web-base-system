@@ -10,7 +10,7 @@ export default function ManageQuality() {
   async function load() {
     setLoading(true);
     try {
-      const res = await api(`/quality?status=${encodeURIComponent(filter)}`);
+      const res = await api(`/quality?status=${encodeURIComponent(filter)}&populate=order,customer`);
       setItems(res || []);
     } catch {
       setItems([]);
@@ -64,8 +64,16 @@ export default function ManageQuality() {
             {items.map((c) => (
               <tr key={c._id} className={c.keywordFlags?.length ? "highlight" : ""}>
                 <td><strong>{c.ticket}</strong></td>
-                <td>{c.issueType}</td>
-                <td>{c.orderNumber || c.order}</td>
+                <td>
+                  <div>{c.issueType}</div>
+                  {c.description && <div className="muted small">{c.description.slice(0, 60)}{c.description.length > 60 ? "…" : ""}</div>}
+                  {c.photoUrl && <div><a href={c.photoUrl} target="_blank" rel="noreferrer"><img src={c.photoUrl} alt="proof" style={{maxWidth:60,maxHeight:40,objectFit:"cover",borderRadius:4,border:"1px solid var(--line)",marginTop:3}} /></a></div>}
+                </td>
+                <td>
+                  <div><strong>{c.orderNumber || (c.order?._id ? c.order._id.toString().slice(-6) : "—")}</strong></div>
+                  <div className="muted small">{c.customer?.name || "—"}</div>
+                  <div className="muted small">Status: {c.status}</div>
+                </td>
                 <td>
                   {c.keywordFlags?.length ? (
                     <span className="badge red"><ShieldAlert size={12} /> {c.keywordFlags.join(", ")}</span>
@@ -77,8 +85,8 @@ export default function ManageQuality() {
                 <td>
                   <div className="row tight">
                     <button className="button small" onClick={() => updateStatus(c._id, "Under Review")}>Review</button>
-                    <button className="button small outline" onClick={() => updateStatus(c._id, "Refunded")} title="Refund"><CheckCircle size={14} /></button>
-                    <button className="button small outline" onClick={() => updateStatus(c._id, "Rejected")} title="Reject"><XCircle size={14} /></button>
+                    <button className="button small outline" onClick={() => updateStatus(c._id, "Refunded")} title="Confirm refund (voids payment + deducts from sales)"><CheckCircle size={14} /> Refund</button>
+                    <button className="button small outline" onClick={() => updateStatus(c._id, "Rejected")} title="Reject"><XCircle size={14} /> Reject</button>
                   </div>
                 </td>
               </tr>
