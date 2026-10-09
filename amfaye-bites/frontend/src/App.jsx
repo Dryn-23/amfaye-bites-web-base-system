@@ -1,5 +1,6 @@
 import PreparationQueue from "./pages/admin/PreparationQueue";
 import ManageReviews from "./pages/admin/Reviews";
+import QualityReports from "./pages/admin/QualityReports";
 import Reviews from "./pages/Reviews";
 import Messages from "./pages/Messages";
 import { useState, useEffect } from "react";
@@ -156,6 +157,7 @@ export default function App() {
         <Route index element={<AdminHome />} />
         <Route path="messages/:chatId?" element={<ProtectedRoute roles={["admin"]}><Messages /></ProtectedRoute>} />
 <Route path="reviews" element={<ProtectedRoute roles={["admin"]}><ManageReviews /></ProtectedRoute>} />
+        <Route path="quality-reports" element={<ProtectedRoute roles={["admin","staff"]}><QualityReports /></ProtectedRoute>} />
 <Route path="preparation" element={<ProtectedRoute roles={["admin", "cashier"]}><PreparationQueue /></ProtectedRoute>} />
 <Route path="pos" element={<POS />} />
         <Route path="orders" element={<Orders />} />
