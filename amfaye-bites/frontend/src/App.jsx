@@ -14,6 +14,9 @@ import ProductDetails from "./pages/ProductDetails";
 import Promotions from "./pages/Promotions";
 import About from "./pages/About";
 import Contact from "./pages/Contact";
+import QualityComplaint from "./pages/QualityComplaint";
+import TrackQuality from "./pages/TrackQuality";
+import ReturnsPolicy from "./pages/ReturnsPolicy";
 import Login from "./pages/Login";
 import Register from "./pages/Register";
 import Cart from "./pages/Cart";
@@ -99,6 +102,9 @@ export default function App() {
         <Route path="promotions" element={<Promotions />} />
         <Route path="about" element={<About />} />
         <Route path="contact" element={<Contact />} />
+        <Route path="quality" element={<QualityComplaint />} />
+        <Route path="quality/track" element={<TrackQuality />} />
+        <Route path="returns" element={<ReturnsPolicy />} />
         <Route path="login" element={<Login />} />
         <Route path="register" element={<Register />} />
         <Route path="cart" element={<Cart />} />

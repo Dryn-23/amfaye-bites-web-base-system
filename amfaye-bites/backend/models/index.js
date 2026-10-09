@@ -282,3 +282,4 @@ export const AuditLog = model(
 );
 
 export { default as Notification } from "./Notification.js";
+export { default as QualityComplaint } from "./QualityComplaint.js";
