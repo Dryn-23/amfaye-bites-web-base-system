@@ -60,7 +60,7 @@ export default function Sidebar({ onClose }) {
         <PreparationNavLink />
         <ReviewNavLink />
         {user.role !== "customer" && (
-          <NavLink to="/quality-reports">
+          <NavLink to="/admin/quality-reports">
             <ShieldAlert size={18} />
             Refunds
           </NavLink>

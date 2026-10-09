@@ -58,14 +58,50 @@ function CustomerLayout() {
 function AdminLayout() {
   const [navOpen, setNavOpen] = useState(false);
   const { pathname } = useLocation();
-  useEffect(() => setNavOpen(false), [pathname]);
+
+  // Close the drawer whenever the route changes
+  useEffect(() => {
+    setNavOpen(false);
+  }, [pathname]);
+
+  // Close with the Escape key
+  useEffect(() => {
+    if (!navOpen) return;
+    const onKey = (e) => e.key === "Escape" && setNavOpen(false);
+    document.addEventListener("keydown", onKey);
+    return () => document.removeEventListener("keydown", onKey);
+  }, [navOpen]);
+
+  // Lock page scroll while the drawer is open
+  useEffect(() => {
+    document.body.style.overflow = navOpen ? "hidden" : "";
+    return () => {
+      document.body.style.overflow = "";
+    };
+  }, [navOpen]);
+
   return (
     <div className={`admin-shell${navOpen ? " nav-open" : ""}`}>
       <header className="admin-mobile-header">
         <Logo />
-        <button className="admin-burger" aria-label="Open navigation" aria-expanded={navOpen} onClick={() => setNavOpen((v) => !v)}><span /><span /><span /></button>
+        <button
+          type="button"
+          className="admin-burger"
+          aria-label={navOpen ? "Close navigation" : "Open navigation"}
+          aria-controls="admin-sidebar"
+          aria-expanded={navOpen}
+          onClick={() => setNavOpen((v) => !v)}
+        >
+          <span />
+          <span />
+          <span />
+        </button>
       </header>
-      <div className="admin-scrim" onClick={() => setNavOpen(false)} aria-hidden="true" />
+      <div
+        className="admin-scrim"
+        onClick={() => setNavOpen(false)}
+        aria-hidden="true"
+      />
       <Sidebar onClose={() => setNavOpen(false)} />
       <main className="admin-main">
         <Outlet />
