@@ -24,13 +24,17 @@ export default function QualityComplaint() {
       const res = await api("/quality", {
         method: "POST",
         body: {
-          ...form,
+          order: form.order,
+          issueType: form.issueType,
           description: form.description.slice(0, 2000),
+          orderNumber: form.orderNumber,
+          photoUrl: form.photo || "",
         },
       });
       setResult(res);
     } catch (err) {
-      setError(err.message || "Could not send the report. Please try again.");
+      const detail = err?.status ? ` (${err.status})` : "";
+      setError((err.message || "Could not send the report. Please try again.") + detail);
     } finally {
       setSending(false);
     }
