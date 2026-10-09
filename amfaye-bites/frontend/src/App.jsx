@@ -52,9 +52,17 @@ function CustomerLayout() {
   );
 }
 function AdminLayout() {
+  const [navOpen, setNavOpen] = useState(false);
+  const { pathname } = useLocation();
+  useEffect(() => setNavOpen(false), [pathname]);
   return (
-    <div className="admin-shell">
-      <Sidebar />
+    <div className={`admin-shell${navOpen ? " nav-open" : ""}`}>
+      <header className="admin-mobile-header">
+        <Logo />
+        <button className="admin-burger" aria-label="Open navigation" aria-expanded={navOpen} onClick={() => setNavOpen((v) => !v)}><span /><span /><span /></button>
+      </header>
+      <div className="admin-scrim" onClick={() => setNavOpen(false)} aria-hidden="true" />
+      <Sidebar onClose={() => setNavOpen(false)} />
       <main className="admin-main">
         <Outlet />
       </main>

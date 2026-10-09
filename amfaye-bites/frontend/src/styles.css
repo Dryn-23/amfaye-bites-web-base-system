@@ -3899,3 +3899,9 @@ td .text-link {
     padding: 0;
   }
 }
+/* Mobile-only sticky admin header (hidden desktop) */
+.admin-mobile-header { display: none; }
+@media (max-width: 768px) {
+  .admin-mobile-header { display: flex; position: sticky; top: 0; z-index: 100; justify-content: space-between; align-items: center; padding: 10px 16px; background: #fffdf7; border-bottom: 1px solid #e4e8dc; }
+  .admin-mobile-header .logo { margin: 0; }
+}
