@@ -23,6 +23,19 @@ r.post("/", wrap(async (req, res) => {
     String(order.user) !== String(req.user._id)
   )
     throw fail(403, "You can only report issues on your own orders.");
+  if (order.paymentStatus === "Voided")
+    throw fail(409, "This order's payment was already refunded or voided.");
+
+  const open = await QualityComplaint.findOne({
+    order: order._id,
+    customer: req.user._id,
+    status: { $in: ["Open", "Under Review"] },
+  }).lean();
+  if (open)
+    throw fail(
+      409,
+      `You already have an open report for this order (${open.ticket}).`,
+    );
 
   const keywords = ["insect", "bug", "mold", "mould", "damaged", "crushed", "spoil", "rotten", "contaminated", "dirty"];
   const text = d.description.toLowerCase();
@@ -51,7 +64,9 @@ r.get("/my", wrap(async (req, res) => {
 
 // Customer / staff: get by ticket
 r.get("/ticket/:ticket", wrap(async (req, res) => {
-  const comp = await QualityComplaint.findOne({ ticket: req.params.ticket }).populate("customer", "name email");
+  const comp = await QualityComplaint.findOne({ ticket: req.params.ticket })
+    .populate("customer", "name email")
+    .populate("order", "number total paymentStatus");
   if (!comp) throw fail(404, "Ticket not found.");
   if (
     !["admin", "cashier"].includes(req.user.role) &&
@@ -67,7 +82,8 @@ r.get("/", staff, wrap(async (req, res) => {
   if (req.query.keyword) filter.keywordFlags = req.query.keyword;
   const populate = req.query.populate ? String(req.query.populate).split(",").map(s => s.trim()) : [];
   let q = QualityComplaint.find(filter).sort({ createdAt: -1 }).limit(200);
-  if (populate.includes("order")) q = q.populate("order", "status total number");
+  if (populate.includes("order"))
+    q = q.populate("order", "status total number paymentStatus");
   if (populate.includes("customer")) q = q.populate("customer", "name email");
   const list = await q;
   res.json(list);
@@ -84,18 +100,23 @@ r.put("/:id/status", staff, wrap(async (req, res) => {
   // refund always has owner-level supervision.
   if (status === "Refunded" && req.user.role !== "admin")
     throw fail(403, "Only admins can confirm refunds.");
-  const update = {};
-  if (status) update.status = status;
-  if (staffNote !== undefined) update.staffNote = String(staffNote).slice(0, 2000);
+  const compId = id.parse(req.params.id);
+  const note =
+    staffNote === undefined ? undefined : String(staffNote).slice(0, 2000);
 
   if (status !== "Refunded") {
-    const comp = await QualityComplaint.findByIdAndUpdate(id.parse(req.params.id), update, { new: true });
+    const comp = await QualityComplaint.findById(compId);
     if (!comp) throw fail(404, "Not found.");
+    if (comp.status === "Refunded")
+      throw fail(409, "A refunded report is final and cannot be reopened.");
+    if (status) comp.status = status;
+    if (note !== undefined) comp.staffNote = note;
+    await comp.save();
     return res.json(comp);
   }
 
   const result = await mongoose.connection.transaction(async (session) => {
-    const comp = await QualityComplaint.findById(id.parse(req.params.id)).session(session);
+    const comp = await QualityComplaint.findById(compId).session(session);
     if (!comp) throw fail(404, "Not found.");
     if (comp.status === "Refunded") return comp;
 
@@ -104,9 +125,19 @@ r.put("/:id/status", staff, wrap(async (req, res) => {
     if (order.paymentStatus !== "Paid")
       throw fail(409, "Only paid orders can be refunded.");
 
+    const set = { status: "Refunded" };
+    if (note !== undefined) set.staffNote = note;
     await QualityComplaint.updateOne(
       { _id: comp._id },
-      { $set: { status: "Refunded", staffNote: update.staffNote ?? "" } },
+      { $set: set },
+      { session },
+    );
+    // Mirror order cancellation: void the order's payment status too, not
+    // just the Payment/Sale docs — otherwise the order still shows "Paid"
+    // and keeps counting in revenue reports.
+    await Order.updateOne(
+      { _id: order._id },
+      { $set: { paymentStatus: "Voided" } },
       { session },
     );
     await Payment.updateOne(

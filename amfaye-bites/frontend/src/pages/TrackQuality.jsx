@@ -1,7 +1,16 @@
 import { useState } from "react";
 import { Link } from "react-router-dom";
-import { Search, ShieldCheck, Ticket, Camera, Clock } from "lucide-react";
+import { Search, ShieldCheck, Ticket, Camera, Clock, CheckCircle } from "lucide-react";
 import { api } from "../services/api";
+import { money } from "../utils/currency";
+
+const STATUS_BADGE = {
+  Open: "muted",
+  "Under Review": "gold",
+  Resolved: "green",
+  Refunded: "green",
+  Rejected: "red",
+};
 
 export default function TrackQuality() {
   const [ticket, setTicket] = useState("");
@@ -30,7 +39,7 @@ export default function TrackQuality() {
       <div className="page-heading centered">
         <span className="eyebrow">TRACK YOUR REFUND</span>
         <h1>Report status</h1>
-        <p>Enter the ticket number we emailed after your report.</p>
+        <p>Enter the ticket number shown when you submitted your report.</p>
       </div>
       <form className="panel stack" onSubmit={lookup}>
         <label>
@@ -51,13 +60,20 @@ export default function TrackQuality() {
         <section className="panel stack">
           <div className="row">
             <h3>{result.ticket}</h3>
-            <span className={`badge ${result.status === "Refunded" ? "green" : "muted"}`}>
+            <span className={`badge ${STATUS_BADGE[result.status] || "muted"}`}>
               {result.status}
             </span>
           </div>
+          {result.status === "Refunded" && (
+            <p className="green">
+              <CheckCircle size={16} /> Refund approved
+              {result.order?.total != null && <> — <strong>{money(result.order.total)}</strong></>}
+              . The payment for this order has been voided.
+            </p>
+          )}
           <dl className="stack tight">
             <div><dt>Issue</dt><dd>{result.issueType}</dd></div>
-            <div><dt>Order</dt><dd>{result.orderNumber || result.order}</dd></div>
+            <div><dt>Order</dt><dd>{result.orderNumber || result.order?.number || "—"}</dd></div>
             <div><dt>Report</dt><dd>{result.description}</dd></div>
             {result.photoUrl && (
               <div>

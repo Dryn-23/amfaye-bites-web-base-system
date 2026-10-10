@@ -11,6 +11,7 @@ import {
   Category,
   Promotion,
   Payment,
+  Order,
 } from "../models/index.js";
 import FlashSale from "../models/FlashSale.js";
 import Bundle from "../models/Bundle.js";
@@ -298,4 +299,98 @@ test("Cashier can view tickets but only admins can confirm refunds", async () =>
   assert.equal(payment.status, "Voided");
   const complaint = await QualityComplaint.findById(comp._id);
   assert.equal(complaint.status, "Refunded");
+  // The order itself must be marked voided — otherwise it still shows
+  // "Paid" and keeps counting in revenue reports.
+  const order = await Order.findById(paid._id);
+  assert.equal(order.paymentStatus, "Voided");
+  // Refunded is terminal — the report cannot be reopened.
+  const reopen = await call(
+    "put",
+    "/quality/" + comp._id + "/status",
+    admin,
+    { status: "Resolved" },
+  );
+  assert.equal(reopen.status, 409);
+  // Repeating the refund is idempotent.
+  const again = await call(
+    "put",
+    "/quality/" + comp._id + "/status",
+    admin,
+    { status: "Refunded" },
+  );
+  assert.equal(again.status, 200);
+  // No new report can be filed on an already-voided order.
+  const dup = await call("post", "/quality", alice, complaintBody(paid._id));
+  assert.equal(dup.status, 409);
+});
+
+test("Refund rules: no duplicate open reports, paid-only refund, note preserved", async () => {
+  // One open report per order per customer.
+  const pending = (
+    await call(
+      "post",
+      "/orders",
+      alice,
+      orderBody([{ product: pastry._id, quantity: 1 }]),
+    )
+  ).body;
+  const first = await call(
+    "post",
+    "/quality",
+    alice,
+    complaintBody(pending._id),
+  );
+  assert.equal(first.status, 201);
+  const dup = await call(
+    "post",
+    "/quality",
+    alice,
+    complaintBody(pending._id),
+  );
+  assert.equal(dup.status, 409);
+  // An unpaid order cannot be refunded.
+  const early = await call(
+    "put",
+    "/quality/" + first.body.complaint._id + "/status",
+    admin,
+    { status: "Refunded" },
+  );
+  assert.equal(early.status, 409);
+  // A staff note set before refunding survives the refund.
+  const otp = (await call("post", "/payments/demo-otp", alice, {})).body;
+  await call("post", "/payments/demo-verify", alice, {
+    sessionId: otp.sessionId,
+    code: otp.demoCode,
+  });
+  const paid = (
+    await call(
+      "post",
+      "/orders",
+      alice,
+      orderBody([{ product: pastry._id, quantity: 1 }], {
+        paymentMethod: "Demo GCash",
+        otpSession: otp.sessionId,
+      }),
+    )
+  ).body;
+  const comp = (
+    await call("post", "/quality", alice, complaintBody(paid._id))
+  ).body.complaint;
+  const noted = await call(
+    "put",
+    "/quality/" + comp._id + "/status",
+    cashier,
+    { status: "Under Review", staffNote: "Verified with kitchen." },
+  );
+  assert.equal(noted.status, 200);
+  const refund = await call(
+    "put",
+    "/quality/" + comp._id + "/status",
+    admin,
+    { status: "Refunded" },
+  );
+  assert.equal(refund.status, 200);
+  const done = await QualityComplaint.findById(comp._id);
+  assert.equal(done.staffNote, "Verified with kitchen.");
+  assert.equal((await Order.findById(paid._id)).paymentStatus, "Voided");
 });

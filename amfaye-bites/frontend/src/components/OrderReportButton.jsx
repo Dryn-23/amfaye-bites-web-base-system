@@ -8,7 +8,8 @@ export default function OrderReportButton({ order }) {
   if (
     !user ||
     user.role !== "customer" ||
-    order.source !== "web"
+    order.source !== "web" ||
+    order.paymentStatus === "Voided"
   )
     return null;
   return (
