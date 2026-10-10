@@ -9,21 +9,57 @@ const read = (key) => {
     return [];
   }
 };
+const readBundle = (key) => {
+  try {
+    return JSON.parse(localStorage.getItem(key) || "null");
+  } catch {
+    return null;
+  }
+};
+const normalizeBundle = (b) =>
+  !b
+    ? null
+    : {
+        _id: b._id,
+        name: b.name,
+        bundlePrice: b.bundlePrice,
+        originalPrice: b.originalPrice,
+        items: (b.items || []).map((i) => ({
+          product: String(i.product?._id || i.product),
+          quantity: i.quantity,
+        })),
+      };
+const coveredBy = (bundle, items) =>
+  !!bundle &&
+  bundle.items.every((bi) =>
+    items.some((i) => i.product._id === bi.product && i.quantity >= bi.quantity),
+  );
+const defaultCustomization = {
+  size: "Small",
+  sugar: "100%",
+  ice: "Regular Ice",
+  addons: [],
+};
 export function CartProvider({ children }) {
   const { user, loading } = useAuth();
   const [items, setItems] = useState(() => read("ab-cart-guest"));
+  const [bundle, setBundle] = useState(() => readBundle("ab-bundle-guest"));
   const [syncError, setSyncError] = useState("");
   const [readyFor, setReadyFor] = useState(null);
   const generation = useRef(0);
   const storageKey = user
     ? "ab-cart-" + (user.id || user._id)
     : "ab-cart-guest";
+  const bundleKey = user
+    ? "ab-bundle-" + (user.id || user._id)
+    : "ab-bundle-guest";
   useEffect(() => {
     if (loading) return;
     const gen = ++generation.current;
     setReadyFor(null);
     if (!user) {
       setItems(read("ab-cart-guest"));
+      setBundle(readBundle("ab-bundle-guest"));
       setReadyFor(storageKey);
       setSyncError("");
       return;
@@ -72,6 +108,19 @@ export function CartProvider({ children }) {
         }
         setItems(merged);
         localStorage.removeItem("ab-cart-guest");
+        // Restore the saved bundle only if the merged cart still covers it.
+        let nextBundle =
+          readBundle(bundleKey) || readBundle("ab-bundle-guest");
+        if (saved.bundle) {
+          try {
+            nextBundle = normalizeBundle(await api("/bundles/" + saved.bundle));
+          } catch {
+            nextBundle = null;
+          }
+        }
+        if (gen !== generation.current) return;
+        setBundle(coveredBy(nextBundle, merged) ? nextBundle : null);
+        localStorage.removeItem("ab-bundle-guest");
         setSyncError("");
       } catch (e) {
         if (gen !== generation.current) return;
@@ -85,6 +134,7 @@ export function CartProvider({ children }) {
   useEffect(() => {
     if (readyFor !== storageKey) return;
     localStorage.setItem(storageKey, JSON.stringify(items));
+    localStorage.setItem(bundleKey, JSON.stringify(bundle));
     if (user) {
       const gen = generation.current;
       const timer = setTimeout(
@@ -97,6 +147,7 @@ export function CartProvider({ children }) {
                 quantity: i.quantity,
                 customization: i.customization,
               })),
+              bundle: bundle?._id || null,
             },
           })
             .then(() => {
@@ -109,7 +160,7 @@ export function CartProvider({ children }) {
       );
       return () => clearTimeout(timer);
     }
-  }, [items, readyFor, storageKey]);
+  }, [items, bundle, readyFor, storageKey]);
   const add = (product, quantity, customization, unitPrice) => {
     const key = product._id + JSON.stringify(customization);
     setItems((old) => {
@@ -127,20 +178,42 @@ export function CartProvider({ children }) {
     });
   };
   const update = (key, qty) =>
-    setItems((a) =>
-      a.map((i) =>
+    setItems((a) => {
+      const next = a.map((i) =>
         i.key === key
           ? { ...i, quantity: Math.max(1, Math.min(99, i.product.stock, qty)) }
           : i,
-      ),
-    );
-  const remove = (key) => setItems((a) => a.filter((i) => i.key !== key));
-  const clear = () => setItems([]);
+      );
+      setBundle((b) => (coveredBy(b, next) ? b : null));
+      return next;
+    });
+  const remove = (key) =>
+    setItems((a) => {
+      const next = a.filter((i) => i.key !== key);
+      setBundle((b) => (coveredBy(b, next) ? b : null));
+      return next;
+    });
+  const clear = () => {
+    setItems([]);
+    setBundle(null);
+  };
+  const addBundle = (b) => {
+    for (const bi of b.items || []) {
+      const product = bi.product;
+      if (!product?._id || product.stock < bi.quantity) continue;
+      add(product, bi.quantity, defaultCustomization, product.price);
+    }
+    setBundle(normalizeBundle(b));
+  };
+  const clearBundle = () => setBundle(null);
   return (
     <Context.Provider
       value={{
         items,
+        bundle,
         add,
+        addBundle,
+        clearBundle,
         update,
         remove,
         clear,

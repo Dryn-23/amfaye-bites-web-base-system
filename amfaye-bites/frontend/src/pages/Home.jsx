@@ -16,7 +16,9 @@ import ProductModal from "../components/ProductModal";
 import LoadingSkeleton from "../components/LoadingSkeleton";
 import FlashSale from "../components/FlashSale";
 import BundleDeals from "../components/BundleDeals";
+import { useCart } from "../context/CartContext";
 export default function Home() {
+  const cart = useCart();
   const [products, setProducts] = useState([]);
   const [selected, setSelected] = useState(null);
   const [tab, setTab] = useState("All favorites");
@@ -168,10 +170,7 @@ export default function Home() {
 
       {bundles.length > 0 && (
         <section className="container">
-          <BundleDeals bundles={bundles} onSelect={(bundle) => {
-            // Handle bundle selection - could add to cart or show modal
-            console.log("Bundle selected:", bundle);
-          }} />
+          <BundleDeals bundles={bundles} onSelect={(bundle) => cart.addBundle(bundle)} />
         </section>
       )}
 

@@ -26,6 +26,7 @@ export const orderInput = z.object({
   customerName: z.string().max(100).optional(),
   idempotencyKey: z.string().min(8).max(100),
   deliveryType: z.enum(["pickup", "delivery"]).default("pickup"),
+  bundleId: id.optional(),
   deliveryAddress: z.object({
     street: z.string().min(5).max(200),
     barangay: z.string().min(2).max(100),
@@ -65,6 +66,27 @@ export const ingredientInput = z.object({
   purchaseCost: z.number().min(0).default(0),
   supplier: z.string().max(100).default(""),
   expirationDate: z.string().datetime().nullable().optional(),
+});
+export const complaintInput = z.object({
+  order: id,
+  issueType: z.enum([
+    "Insects / Pest",
+    "Mold / Spoilage",
+    "Damaged / Crushed",
+    "Wrong Item",
+    "Allergen / Health",
+    "Other",
+  ]),
+  description: z.string().trim().min(5).max(2000),
+  orderNumber: z.string().max(50).optional(),
+  photoUrl: z
+    .string()
+    .max(500)
+    .refine(
+      (v) => !v || v.startsWith("/") || /^https:\/\//.test(v),
+      "Use a local path or HTTPS image",
+    )
+    .optional(),
 });
 export const fail = (status, message) =>
   Object.assign(new Error(message), { status });

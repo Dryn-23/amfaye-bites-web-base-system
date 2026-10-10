@@ -54,12 +54,7 @@ export default function Menu() {
       </div>
       <div className="menu-toolbar">
         <div className="tabs">
-          {[
-            "All",
-            ...categories
-              .filter((c) => ["Pastries", "Fruit Shakes"].includes(c.name))
-              .map((c) => c.name),
-          ].map((c) => (
+          {["All", ...categories.map((c) => c.name)].map((c) => (
             <button
               key={c}
               className={category === c ? "active" : ""}

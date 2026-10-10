@@ -183,7 +183,7 @@ export default function DeliveryTracker({ order }) {
             />
           </div>
           <div style={{ padding: "0.5rem 1rem", textAlign: "center", fontSize: "0.85rem", color: "#666" }}>
-            <small>🗺️ Live tracking • Delivery progress: {Math.round(progress)}%</small>
+            <small>🗺️ Simulated tracking (demo) • Delivery progress: {Math.round(progress)}%</small>
           </div>
         </div>
       )}

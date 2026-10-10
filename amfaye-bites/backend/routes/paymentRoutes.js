@@ -13,7 +13,15 @@ r.use(
     message: { message: "Please wait before trying again." },
   }),
 );
-r.post("/demo-otp", wrap(c.otp));
+r.post(
+  "/demo-otp",
+  rateLimit({
+    windowMs: 60000,
+    limit: 5,
+    message: { message: "Please wait before requesting another code." },
+  }),
+  wrap(c.otp),
+);
 r.post("/demo-verify", wrap(c.verify));
 r.post("/cash", staff, wrap(c.collect));
 export default r;

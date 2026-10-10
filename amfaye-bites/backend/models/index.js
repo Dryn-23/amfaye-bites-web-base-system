@@ -107,6 +107,7 @@ const cartItem = {
 export const Cart = model("Cart", {
   user: { ...ref("User", true), unique: true },
   items: [cartItem],
+  bundle: ref("Bundle"),
 });
 export const Ingredient = model("Ingredient", {
   name: { ...str, required: true, unique: true },

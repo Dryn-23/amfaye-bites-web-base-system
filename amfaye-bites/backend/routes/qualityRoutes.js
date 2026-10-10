@@ -2,7 +2,7 @@ import { Router } from "express";
 import mongoose from "mongoose";
 import { auth } from "../middleware/authMiddleware.js";
 import { staff } from "../middleware/roleMiddleware.js";
-import { wrap, id, fail } from "../utils/validators.js";
+import { wrap, id, fail, complaintInput } from "../utils/validators.js";
 import { QualityComplaint, Payment, Sale, AuditLog, Order } from "../models/index.js";
 
 function makeTicket() {
@@ -14,31 +14,33 @@ r.use(auth);
 
 // Customer: create quality complaint / refund request
 r.post("/", wrap(async (req, res) => {
-  const { order, issueType, description, orderNumber, photoUrl } = req.body;
-  if (!order || !issueType || !description) throw fail(400, "Order, issue type, and description are required.");
-  if (!req.user?._id) throw fail(401, "Login required.");
+  const d = complaintInput.parse(req.body);
+
+  const order = await Order.findById(d.order).lean();
+  if (!order) throw fail(404, "Order not found.");
+  if (
+    !["admin", "cashier"].includes(req.user.role) &&
+    String(order.user) !== String(req.user._id)
+  )
+    throw fail(403, "You can only report issues on your own orders.");
 
   const keywords = ["insect", "bug", "mold", "mould", "damaged", "crushed", "spoil", "rotten", "contaminated", "dirty"];
-  const text = (description || "").toLowerCase();
+  const text = d.description.toLowerCase();
   const flags = keywords.filter(k => text.includes(k));
 
-  const ticket = (req.body.ticket && typeof req.body.ticket === "string" && req.body.ticket.trim().length > 2)
-    ? req.body.ticket.trim()
-    : makeTicket();
-
   const complaint = await QualityComplaint.create({
-    order,
+    order: order._id,
     customer: req.user._id,
-    orderNumber: (orderNumber || "").trim().slice(0, 50),
-    issueType,
-    description: description.trim().slice(0, 2000),
-    photoUrl: (photoUrl || "").trim().slice(0, 500),
+    orderNumber: (d.orderNumber || order.number || "").trim().slice(0, 50),
+    issueType: d.issueType,
+    description: d.description.slice(0, 2000),
+    photoUrl: (d.photoUrl || "").trim().slice(0, 500),
     status: flags.length ? "Under Review" : "Open",
-    ticket,
+    ticket: makeTicket(),
     keywordFlags: flags,
   });
 
-  res.status(201).json({ complaint, ticket, flagged: flags.length > 0 });
+  res.status(201).json({ complaint, ticket: complaint.ticket, flagged: flags.length > 0 });
 }));
 
 // Customer: list own complaints (track ticket)
@@ -51,7 +53,10 @@ r.get("/my", wrap(async (req, res) => {
 r.get("/ticket/:ticket", wrap(async (req, res) => {
   const comp = await QualityComplaint.findOne({ ticket: req.params.ticket }).populate("customer", "name email");
   if (!comp) throw fail(404, "Ticket not found.");
-  if (req.user.role !== "admin" && req.user.role !== "staff" && String(comp.customer?._id) !== String(req.user._id)) throw fail(403, "Not authorized.");
+  if (
+    !["admin", "cashier"].includes(req.user.role) &&
+    String(comp.customer?._id) !== String(req.user._id)
+  ) throw fail(403, "Not authorized.");
   res.json(comp);
 }));
 
@@ -75,6 +80,10 @@ r.put("/:id/status", staff, wrap(async (req, res) => {
   const { status, staffNote } = req.body;
   const allowed = ["Open", "Under Review", "Resolved", "Refunded", "Rejected"];
   if (status && !allowed.includes(status)) throw fail(400, "Invalid status.");
+  // Refunds void the order's payment and sale — restricted to admins so a
+  // refund always has owner-level supervision.
+  if (status === "Refunded" && req.user.role !== "admin")
+    throw fail(403, "Only admins can confirm refunds.");
   const update = {};
   if (status) update.status = status;
   if (staffNote !== undefined) update.staffNote = String(staffNote).slice(0, 2000);
@@ -122,7 +131,6 @@ r.put("/:id/status", staff, wrap(async (req, res) => {
       ],
       { session },
     );
-    await order.save({ session });
     return QualityComplaint.findById(comp._id).session(session);
   });
   res.json(result);

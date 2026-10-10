@@ -21,5 +21,3 @@ try {
   );
   process.exit(1);
 }
-import qualityRoutes from "./routes/qualityRoutes.js";
-app.use("/api/quality", qualityRoutes);

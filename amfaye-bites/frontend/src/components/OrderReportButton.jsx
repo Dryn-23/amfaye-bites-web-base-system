@@ -13,7 +13,7 @@ export default function OrderReportButton({ order }) {
     return null;
   return (
     <div className="order-chat-action order-report-action no-print">
-      <Link className="button outline" to={`/quality?order=${encodeURIComponent(order.number || "")}`}>
+      <Link className="button outline" to={`/quality?order=${encodeURIComponent(order._id || order.id || "")}`}>
         <ShieldAlert size={17} />
         Report an issue
       </Link>

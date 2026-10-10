@@ -210,8 +210,11 @@ test("POS validates cash amount, creates sale, payment, receipt and change", asy
     makeOrder(p, { source: "pos", amountReceived: 200, promoCode: "SWEET10" }),
   );
   assert.equal(r.status, 201, JSON.stringify(r.body));
-  // VAT is charged on the pre-discount subtotal: total = subtotal - 10% + 12% VAT.
-  assert.equal(r.body.total, Math.round((p.price - p.price * 0.1 + p.price * 0.12) * 100) / 100);
+  // VAT is charged on the discounted subtotal: total = subtotal - 10% + 12% VAT on the remainder.
+  assert.equal(
+    r.body.total,
+    Math.round((p.price - p.price * 0.1 + (p.price - p.price * 0.1) * 0.12) * 100) / 100,
+  );
   const d = await req("get", "/orders/" + r.body._id, admin);
   assert.equal(
     d.body.payment.change,

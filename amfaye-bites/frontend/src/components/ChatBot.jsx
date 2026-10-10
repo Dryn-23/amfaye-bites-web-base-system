@@ -58,7 +58,7 @@ const FAQ_RESPONSES = {
   },
   cancel: {
     keywords: ["cancel", "refund", "return"],
-    response: "You can cancel orders that are Pending or Confirmed. For paid orders, please contact us for assistance. ❌",
+    response: "To cancel an order, please contact our staff — only they can process cancellations and refunds. Reach us via the Messages icon! ❌",
   },
   menu: {
     keywords: ["menu", "products", "items", "pastries", "shakes"],
@@ -66,7 +66,7 @@ const FAQ_RESPONSES = {
   },
   promo: {
     keywords: ["promo", "discount", "coupon", "deal", "sale"],
-    response: "We have regular promotions! Use code SWEET10 for 10% off. Check our Promotions page for current deals! 🎉",
+    response: "We have regular promotions! Check our Promotions page for the current discount codes. 🎉",
   },
   customization: {
     keywords: ["custom", "size", "sugar", "ice", "addon"],

@@ -17,6 +17,8 @@ import {
   Promotion,
   Cart,
 } from "../models/index.js";
+import FlashSale from "../models/FlashSale.js";
+import Bundle from "../models/Bundle.js";
 import { fail, orderInput } from "../utils/validators.js";
 export const round = (n) => Math.round((n + Number.EPSILON) * 100) / 100;
 export async function createOrder(body, user) {
@@ -39,6 +41,18 @@ export async function createOrder(body, user) {
       result = existing;
       return;
     }
+    const now = new Date();
+    // Storefront flash sales apply to web orders only; each customer's uses are
+    // capped by the sale's maxUsesPerCustomer.
+    const flashSales =
+      input.source === "web"
+        ? await FlashSale.find({
+            active: true,
+            startDate: { $lte: now },
+            endDate: { $gt: now },
+          }).session(session)
+        : [];
+    const appliedSales = new Map();
     const items = [];
     const usage = new Map();
     let subtotal = 0;
@@ -76,7 +90,19 @@ export async function createOrder(body, user) {
         line.customization.size !== "Small"
       )
         throw fail(400, "This pastry cannot be customized.");
-      const unitPrice = round(p.price + extra);
+      const sale = flashSales
+        .filter(
+          (s) =>
+            (s.products.some((x) => String(x) === String(p._id)) ||
+              s.categories.some((c) => String(c) === String(p.category))) &&
+            s.usedBy.filter((u) => String(u.user) === String(user._id)).length <
+              s.maxUsesPerCustomer,
+        )
+        .sort((a, b) => b.discountPercent - a.discountPercent)[0];
+      const unitPrice = sale
+        ? round((p.price + extra) * (100 - sale.discountPercent) / 100)
+        : round(p.price + extra);
+      if (sale) appliedSales.set(String(sale._id), sale);
       const lineTotal = round(unitPrice * line.quantity);
       subtotal = round(subtotal + lineTotal);
       items.push({
@@ -129,6 +155,33 @@ export async function createOrder(body, user) {
       discount = round((subtotal * promo.percent) / 100);
       await Promotion.findByIdAndUpdate(promo._id, { $inc: { useCount: 1 } }).session(session);
     }
+    if (input.bundleId) {
+      const bundle = await Bundle.findById(input.bundleId).session(session);
+      const live =
+        bundle &&
+        bundle.active &&
+        (!bundle.startDate || bundle.startDate <= now) &&
+        (!bundle.endDate || bundle.endDate > now);
+      if (!live) throw fail(400, "This bundle deal is no longer available.");
+      const covered = bundle.items.every((bi) =>
+        items.some(
+          (i) => String(i.product) === String(bi.product) && i.quantity >= bi.quantity,
+        ),
+      );
+      if (!covered)
+        throw fail(400, "Your order no longer includes every bundle item.");
+      const bundleCost = round(
+        bundle.items.reduce(
+          (n, bi) =>
+            n +
+            items.find((i) => String(i.product) === String(bi.product))
+              .unitPrice *
+              bi.quantity,
+          0,
+        ),
+      );
+      discount = round(discount + Math.max(0, bundleCost - bundle.bundlePrice));
+    }
     let deliveryFee = 0;
     if (input.deliveryType === "delivery") {
       if (!input.deliveryAddress) {
@@ -137,7 +190,8 @@ export async function createOrder(body, user) {
       deliveryFee = 50; // Flat fee for prototype
     }
     const vatRate = parseFloat(process.env.VAT_RATE || "0.12"); // 12% default
-    const vat = round(subtotal * vatRate);
+    // VAT applies to what the customer actually pays, after promo and bundle savings.
+    const vat = round(Math.max(0, subtotal - discount) * vatRate);
     const total = round(subtotal - discount + deliveryFee + vat);
     let paid = input.paymentMethod === "Demo GCash" || input.source === "pos";
     let received = total;
@@ -239,7 +293,13 @@ export async function createOrder(body, user) {
     if (input.source === "web")
       await Cart.updateOne(
         { user: user._id },
-        { $set: { items: [] } },
+        { $set: { items: [], bundle: null } },
+        { session },
+      );
+    for (const sale of appliedSales.values())
+      await FlashSale.updateOne(
+        { _id: sale._id },
+        { $push: { usedBy: { user: user._id, usedAt: new Date() } } },
         { session },
       );
     await notifyOrderStatus(order, session);

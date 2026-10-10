@@ -109,7 +109,12 @@ r.put(
   "/cart",
   auth,
   wrap(async (req, res) => {
-    const d = z.object({ items: z.array(item).max(50) }).parse(req.body);
+    const d = z
+      .object({
+        items: z.array(item).max(50),
+        bundle: id.nullable().optional(),
+      })
+      .parse(req.body);
     res.json(
       await Cart.findOneAndUpdate(
         { user: req.user._id },

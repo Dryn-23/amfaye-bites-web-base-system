@@ -53,9 +53,13 @@ export default function Checkout() {
   const isDelivery = deliveryType === "delivery";
   const offer = promotions.find((p) => p.code === promo.trim().toUpperCase());
   const discount = offer ? Math.round(cart.total * offer.percent) / 100 : 0;
+  const bundleSavings = cart.bundle
+    ? Math.max(0, cart.bundle.originalPrice - cart.bundle.bundlePrice)
+    : 0;
   const deliveryFee = isDelivery ? DELIVERY_FEE : 0;
-  const vat = Math.round(cart.total * VAT_RATE * 100) / 100;
-  const total = cart.total - discount + deliveryFee + vat;
+  const vat =
+    Math.round(Math.max(0, cart.total - discount - bundleSavings) * VAT_RATE * 100) / 100;
+  const total = cart.total - discount - bundleSavings + deliveryFee + vat;
 
   const blocked = cooldown.remaining > 0 || cooldown.checking;
   const needsOtp = method === "Demo GCash" && !otp;
@@ -92,6 +96,7 @@ export default function Checkout() {
           deliveryType,
           deliveryAddress: isDelivery ? address : undefined,
           deliveryCarrier: isDelivery ? carrier : "N/A",
+          bundleId: cart.bundle?._id,
           idempotencyKey: keyRef.current,
         },
       });
@@ -100,6 +105,8 @@ export default function Checkout() {
     } catch (e) {
       if (!cooldown.applyBlock(e)) {
         setError(e.message);
+        // Drop a stale bundle reference so a retry can succeed without it.
+        if (/bundle/i.test(e.message || "")) cart.clearBundle();
         // The server rejected the order (stock, promo, validation, etc.), so
         // a retry with a changed cart is a new attempt and needs a new key.
         // Network failures keep the key so a retry can't create a duplicate.
@@ -333,6 +340,12 @@ export default function Checkout() {
             <div className="summary-line green">
               <span>Discount</span>
               <span>−{money(discount)}</span>
+            </div>
+          )}
+          {bundleSavings > 0 && (
+            <div className="summary-line green">
+              <span>Bundle deal{cart.bundle?.name ? ` — ${cart.bundle.name}` : ""}</span>
+              <span>−{money(bundleSavings)}</span>
             </div>
           )}
           <div className="summary-line">

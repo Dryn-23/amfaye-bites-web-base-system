@@ -1,7 +1,9 @@
-import { Gift, Check } from "lucide-react";
+import { useState } from "react";
+import { Gift, Check, ShoppingBag } from "lucide-react";
 import { money } from "../utils/currency";
 
 export default function BundleDeals({ bundles, onSelect }) {
+  const [added, setAdded] = useState("");
   if (!bundles || bundles.length === 0) return null;
 
   return (
@@ -74,9 +76,21 @@ export default function BundleDeals({ bundles, onSelect }) {
                   background: "rgba(255, 255, 255, 0.9)",
                   color: "#667eea"
                 }}
-                onClick={() => onSelect(bundle)}
+                onClick={() => {
+                  onSelect(bundle);
+                  setAdded(bundle._id);
+                  setTimeout(() => setAdded(""), 1600);
+                }}
               >
-                Add Bundle to Cart
+                {added === bundle._id ? (
+                  <>
+                    <Check size={16} /> Added to your bag
+                  </>
+                ) : (
+                  <>
+                    <ShoppingBag size={16} /> Add Bundle to Cart
+                  </>
+                )}
               </button>
             </div>
           </div>
