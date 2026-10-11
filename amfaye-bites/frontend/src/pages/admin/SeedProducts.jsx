@@ -29,9 +29,8 @@ export default function SeedProducts() {
             <p className="error">{result.error}</p>
           ) : (
             <p className="success">
-              Created <strong>{result.created}</strong>, updated images for{" "}
-              <strong>{result.updated}</strong>, skipped{" "}
-              <strong>{result.skipped}</strong>.
+              Created <strong>{result.created}</strong> products and updated images for{" "}
+              <strong>{result.updated}</strong> products.
               You can now remove this temporary page.
             </p>
           )}

@@ -83,23 +83,17 @@ r.post(
     }
 
     function imageUrl(p) {
-      const prompt = `appetizing food photography of ${p.name}, ${p.category}, professional studio lighting, clean background`;
-      return `https://image.pollinations.ai/prompt/${encodeURIComponent(prompt)}?width=600&height=400&nologo=true&seed=${encodeURIComponent(p.name)}`;
+      return `https://picsum.photos/seed/${encodeURIComponent(p.name)}/600/400`;
     }
 
     let created = 0;
     let updated = 0;
-    let skipped = 0;
     for (const p of products) {
       const existing = await Product.findOne({ name: p.name });
       if (existing) {
-        if (!existing.image) {
-          existing.image = imageUrl(p);
-          await existing.save();
-          updated++;
-        } else {
-          skipped++;
-        }
+        existing.image = imageUrl(p);
+        await existing.save();
+        updated++;
         continue;
       }
       await Product.create({
@@ -112,7 +106,7 @@ r.post(
       });
       created++;
     }
-    res.json({ created, updated, skipped });
+    res.json({ created, updated });
   }),
 );
 
