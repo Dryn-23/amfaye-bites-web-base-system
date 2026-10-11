@@ -38,7 +38,6 @@ const links = [
   ["cash-drawer", "Cash drawer", Wallet],
   ["refunds", "Refunds", Banknote],
   ["refund-reports", "Refund Report", Banknote],
-  ["seed-products", "Seed Products", Banknote],
   ["analytics", "Analytics", BarChart3],
   ["users", "Users", UserCog],
   ["settings", "Settings", Settings],

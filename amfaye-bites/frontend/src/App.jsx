@@ -38,7 +38,6 @@ import PromotionsAdmin from "./pages/admin/PromotionsAdmin";
 import ShiftReport from "./pages/admin/ShiftReport";
 import RefundsAdmin from "./pages/admin/RefundsAdmin";
 import RefundReports from "./pages/admin/RefundReports";
-import SeedProducts from "./pages/admin/SeedProducts";
 import RefundRequest from "./pages/RefundRequest";
 import { useAuth } from "./context/AuthContext";
 import ChatBot from "./components/ChatBot";
@@ -172,7 +171,6 @@ export default function App() {
           ["settings", Settings],
           ["refunds", RefundsAdmin],
           ["refund-reports", RefundReports],
-          ["seed-products", SeedProducts],
         ].map(([path, Page]) => (
           <Route
             key={path}

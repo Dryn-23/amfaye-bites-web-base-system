@@ -78,6 +78,10 @@ const products = [
   { name: "Veggie Sandwich", category: "Sandwiches", price: 130, stock: 15 },
 ];
 
+function imageUrl(p) {
+  return `https://image.pollinations.ai/prompt/food%20${encodeURIComponent(p.name)}?width=600&height=400&seed=${encodeURIComponent(p.name)}`;
+}
+
 async function run() {
   if (!process.env.MONGODB_URI) {
     console.error("MONGODB_URI is not set.");
@@ -99,11 +103,19 @@ async function run() {
   }
 
   let created = 0;
+  let updated = 0;
   let skipped = 0;
   for (const p of products) {
-    const exists = await Product.exists({ name: p.name });
-    if (exists) {
-      skipped++;
+    const existing = await Product.findOne({ name: p.name });
+    if (existing) {
+      const url = imageUrl(p);
+      if (existing.image !== url) {
+        existing.image = url;
+        await existing.save();
+        updated++;
+      } else {
+        skipped++;
+      }
       continue;
     }
     await Product.create({
@@ -112,12 +124,12 @@ async function run() {
       available: true,
       featured: false,
       minimumStock: 5,
-      image: "",
+      image: imageUrl(p),
     });
     created++;
   }
 
-  console.log(`Created ${created} products, skipped ${skipped} duplicates.`);
+  console.log(`Created ${created}, updated ${updated}, skipped ${skipped}.`);
   await mongoose.disconnect();
   console.log("Done.");
 }
