@@ -38,7 +38,19 @@ const apiRateLimit = Number(process.env.API_RATE_LIMIT) || 600;
 
 app.set("trust proxy", 1);
 app.disable("x-powered-by");
-app.use(helmet());
+app.use(
+  helmet({
+    contentSecurityPolicy: {
+      directives: {
+        defaultSrc: ["'self'"],
+        styleSrc: ["'self'", "'unsafe-inline'"],
+        imgSrc: ["'self'", "https:", "data:"],
+        connectSrc: ["'self'"],
+        scriptSrc: ["'self'"],
+      },
+    },
+  }),
+);
 app.use(compression());
 
 app.use(

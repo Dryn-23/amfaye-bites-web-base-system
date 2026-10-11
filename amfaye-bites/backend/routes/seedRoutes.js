@@ -82,12 +82,24 @@ r.post(
       catMap.set(c.name, doc._id);
     }
 
+    function imageUrl(p) {
+      const prompt = `appetizing food photography of ${p.name}, ${p.category}, professional studio lighting, clean background`;
+      return `https://image.pollinations.ai/prompt/${encodeURIComponent(prompt)}?width=600&height=400&nologo=true&seed=${encodeURIComponent(p.name)}`;
+    }
+
     let created = 0;
+    let updated = 0;
     let skipped = 0;
     for (const p of products) {
-      const exists = await Product.exists({ name: p.name });
-      if (exists) {
-        skipped++;
+      const existing = await Product.findOne({ name: p.name });
+      if (existing) {
+        if (!existing.image) {
+          existing.image = imageUrl(p);
+          await existing.save();
+          updated++;
+        } else {
+          skipped++;
+        }
         continue;
       }
       await Product.create({
@@ -96,11 +108,11 @@ r.post(
         available: true,
         featured: false,
         minimumStock: 5,
-        image: "",
+        image: imageUrl(p),
       });
       created++;
     }
-    res.json({ created, skipped });
+    res.json({ created, updated, skipped });
   }),
 );
 

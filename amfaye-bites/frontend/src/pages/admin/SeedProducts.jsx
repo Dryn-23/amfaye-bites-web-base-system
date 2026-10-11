@@ -20,8 +20,8 @@ export default function SeedProducts() {
     <div className="admin-page">
       <h1>Temporary: Add sample products</h1>
       <p className="muted">
-        Click once to add the 47 sample products to the live database.
-        This page will be removed right after.
+        Click once to add the 47 sample products and assign AI-generated
+        images. This page will be removed right after.
       </p>
       {result ? (
         <div className="panel">
@@ -29,8 +29,9 @@ export default function SeedProducts() {
             <p className="error">{result.error}</p>
           ) : (
             <p className="success">
-              Created <strong>{result.created}</strong> products, skipped{" "}
-              <strong>{result.skipped}</strong> duplicates.
+              Created <strong>{result.created}</strong>, updated images for{" "}
+              <strong>{result.updated}</strong>, skipped{" "}
+              <strong>{result.skipped}</strong>.
               You can now remove this temporary page.
             </p>
           )}
