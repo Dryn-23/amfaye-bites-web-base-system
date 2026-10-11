@@ -37,6 +37,7 @@ export const orderInput = z.object({
     }).optional()
   }).optional(),
   deliveryCarrier: z.enum(["Foodpanda", "Grab", "N/A"]).default("N/A"),
+  bundleId: id.optional(),
 });
 export const productInput = z.object({
   name: z.string().trim().min(2).max(100),
@@ -56,6 +57,27 @@ export const productInput = z.object({
   featured: z.boolean().default(false),
   customizable: z.boolean().default(false),
   badge: z.string().max(30).default(""),
+});
+export const complaintInput = z.object({
+  order: id,
+  issueType: z.enum([
+    "Insects / Pest",
+    "Mold / Spoilage",
+    "Damaged / Crushed",
+    "Wrong Item",
+    "Allergen / Health",
+    "Other",
+  ]),
+  description: z.string().trim().min(5).max(2000),
+  orderNumber: z.string().max(50).optional(),
+  photoUrl: z
+    .string()
+    .max(500)
+    .refine(
+      (v) => !v || v.startsWith("/") || /^https:\/\//.test(v),
+      "Use a local path or HTTPS image",
+    )
+    .optional(),
 });
 export const ingredientInput = z.object({
   name: z.string().trim().min(2).max(100),

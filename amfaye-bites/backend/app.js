@@ -1,264 +1,112 @@
-import { useState, useEffect } from "react";
-import { Routes, Route, Outlet, useLocation, Navigate } from "react-router-dom";
-import Navbar, { Logo } from "./components/Navbar";
-import Footer from "./components/Footer";
-import Sidebar from "./components/Sidebar";
-import ProtectedRoute from "./components/ProtectedRoute";
-import ChatBot from "./components/ChatBot";
-import { useAuth } from "./context/AuthContext";
+import express from "express";
+import cors from "cors";
+import helmet from "helmet";
+import compression from "compression";
+import rateLimit from "express-rate-limit";
+import mongoose from "mongoose";
 
-// Customer pages
-import Home from "./pages/Home";
-import Menu from "./pages/Menu";
-import ProductDetails from "./pages/ProductDetails";
-import Promotions from "./pages/Promotions";
-import About from "./pages/About";
-import Contact from "./pages/Contact";
-import Login from "./pages/Login";
-import Register from "./pages/Register";
-import Cart from "./pages/Cart";
-import Checkout from "./pages/Checkout";
-import MyOrders from "./pages/MyOrders";
-import Profile from "./pages/Profile";
-import Reviews from "./pages/Reviews";
-import Messages from "./pages/Messages";
-import Unauthorized from "./pages/Unauthorized";
-import NotFound from "./pages/NotFound";
+import auth from "./routes/authRoutes.js";
+import products from "./routes/productRoutes.js";
+import categories from "./routes/categoryRoutes.js";
+import orders from "./routes/orderRoutes.js";
+import inventory from "./routes/inventoryRoutes.js";
+import payments from "./routes/paymentRoutes.js";
+import users from "./routes/userRoutes.js";
+import reports from "./routes/reportRoutes.js";
+import extras from "./routes/extraRoutes.js";
+import preparation from "./routes/preparationRoutes.js";
+import reviews from "./routes/reviewRoutes.js";
+import chats from "./routes/chatRoutes.js";
+import notifications from "./routes/notificationRoutes.js";
+import quality from "./routes/qualityRoutes.js";
+import flashSales from "./routes/flashSales.js";
+import bundles from "./routes/bundles.js";
+import refunds from "./routes/refundRoutes.js";
+import { errorHandler } from "./middleware/errorMiddleware.js";
 
-// Admin pages
-import Dashboard from "./pages/admin/Dashboard";
-import POS from "./pages/admin/POS";
-import Orders from "./pages/admin/Orders";
-import Products from "./pages/admin/Products";
-import Categories from "./pages/admin/Categories";
-import Inventory from "./pages/admin/Inventory";
-import Customers from "./pages/admin/Customers";
-import Sales from "./pages/admin/Sales";
-import Reports from "./pages/admin/Reports";
-import Analytics from "./pages/admin/Analytics";
-import Users from "./pages/admin/Users";
-import Settings from "./pages/admin/Settings";
-import PromotionsAdmin from "./pages/admin/PromotionsAdmin";
-import ShiftReport from "./pages/admin/ShiftReport";
-import PreparationQueue from "./pages/admin/PreparationQueue";
-import ManageReviews from "./pages/admin/Reviews";
+export const app = express();
 
-function CustomerLayout() {
-  return (
-    <>
-      <Navbar />
-      <main>
-        <Outlet />
-      </main>
-      <Footer />
-      <ChatBot />
-    </>
-  );
+const dbReady = () => mongoose.connection.readyState === 1;
+
+// Set to "true" ONLY on your local machine when running load tests.
+// Never set this in production.
+const rateLimitDisabled = process.env.DISABLE_RATE_LIMIT === "true";
+
+// Requests per minute per IP. Override with API_RATE_LIMIT in your .env.
+const apiRateLimit = Number(process.env.API_RATE_LIMIT) || 600;
+
+app.set("trust proxy", 1);
+app.disable("x-powered-by");
+app.use(helmet());
+app.use(compression());
+
+app.use(
+  cors({
+    origin(origin, cb) {
+      const allowed = (process.env.FRONTEND_URL || "http://localhost:5173")
+        .split(",")
+        .map((s) => s.trim());
+      cb(null, !origin || allowed.includes(origin));
+    },
+  }),
+);
+
+app.use(express.json({ limit: "100kb" }));
+
+// Health check sits ABOVE the rate limiter so uptime monitors and
+// load balancers are never blocked and don't use up the client's quota.
+app.get("/api/health", (req, res) => {
+  const ok = dbReady();
+  res.status(ok ? 200 : 503).json({
+    success: ok,
+    message: ok ? "Amfaye Bites API is running" : "Database unavailable",
+  });
+});
+
+// Global limiter for the rest of the API.
+app.use(
+  "/api",
+  rateLimit({
+    windowMs: 60 * 1000,
+    limit: apiRateLimit,
+    message: { message: "Too many requests. Please wait a minute." },
+    skip: () => rateLimitDisabled,
+  }),
+);
+
+// Block API calls while the database is down.
+app.use("/api", (req, res, next) =>
+  dbReady()
+    ? next()
+    : res
+        .status(503)
+        .json({ message: "Database unavailable. Please try again shortly." }),
+);
+
+const routes = {
+  preparation,
+  reviews,
+  chats,
+  auth,
+  products,
+  categories,
+  orders,
+  inventory,
+  payments,
+  users,
+  reports,
+  notifications,
+  quality,
+  "flash-sales": flashSales,
+  bundles,
+  refunds,
+};
+
+for (const [path, router] of Object.entries(routes)) {
+  app.use(`/api/${path}`, router);
 }
 
-function AdminLayout() {
-  const [navOpen, setNavOpen] = useState(false);
-  const { pathname } = useLocation();
+app.use("/api", extras);
 
-  // Close the drawer whenever the route changes
-  useEffect(() => {
-    setNavOpen(false);
-  }, [pathname]);
-
-  // Close with the Escape key
-  useEffect(() => {
-    if (!navOpen) return;
-    const onKey = (e) => e.key === "Escape" && setNavOpen(false);
-    document.addEventListener("keydown", onKey);
-    return () => document.removeEventListener("keydown", onKey);
-  }, [navOpen]);
-
-  // Lock page scroll while the drawer is open
-  useEffect(() => {
-    document.body.style.overflow = navOpen ? "hidden" : "";
-    return () => {
-      document.body.style.overflow = "";
-    };
-  }, [navOpen]);
-
-  return (
-    <div className={`admin-shell${navOpen ? " nav-open" : ""}`}>
-      <header className="admin-mobile-header">
-        <Logo />
-        <button
-          type="button"
-          className="admin-burger"
-          aria-label={navOpen ? "Close navigation" : "Open navigation"}
-          aria-controls="admin-sidebar"
-          aria-expanded={navOpen}
-          onClick={() => setNavOpen((v) => !v)}
-        >
-          <span />
-          <span />
-          <span />
-        </button>
-      </header>
-
-      <div
-        className="admin-scrim"
-        onClick={() => setNavOpen(false)}
-        aria-hidden="true"
-      />
-
-      <Sidebar onClose={() => setNavOpen(false)} />
-
-      <main className="admin-main">
-        <Outlet />
-      </main>
-    </div>
-  );
-}
-
-function AdminHome() {
-  const { user } = useAuth();
-  return user.role === "cashier" ? (
-    <Navigate to="/admin/pos" replace />
-  ) : (
-    <Dashboard />
-  );
-}
-
-// Admin-only pages, generated from one list
-const adminOnlyPages = [
-  ["products", Products],
-  ["categories", Categories],
-  ["promotions", PromotionsAdmin],
-  ["customers", Customers],
-  ["sales", Sales],
-  ["reports", Reports],
-  ["cash-drawer", ShiftReport],
-  ["analytics", Analytics],
-  ["users", Users],
-  ["settings", Settings],
-];
-
-export default function App() {
-  const { pathname } = useLocation();
-
-  useEffect(() => {
-    window.scrollTo(0, 0);
-  }, [pathname]);
-
-  return (
-    <Routes>
-      {/* ---------- Customer site ---------- */}
-      <Route element={<CustomerLayout />}>
-        <Route index element={<Home />} />
-        <Route path="menu" element={<Menu />} />
-        <Route
-          path="pastries"
-          element={<Navigate to="/menu?category=Pastries" replace />}
-        />
-        <Route
-          path="fruit-shakes"
-          element={<Navigate to="/menu?category=Fruit%20Shakes" replace />}
-        />
-        <Route path="products/:id" element={<ProductDetails />} />
-        <Route path="products/:id/reviews" element={<Reviews />} />
-        <Route path="promotions" element={<Promotions />} />
-        <Route path="about" element={<About />} />
-        <Route path="contact" element={<Contact />} />
-        <Route path="login" element={<Login />} />
-        <Route path="register" element={<Register />} />
-        <Route path="cart" element={<Cart />} />
-        <Route
-          path="checkout"
-          element={
-            <ProtectedRoute>
-              <Checkout />
-            </ProtectedRoute>
-          }
-        />
-        <Route
-          path="orders"
-          element={
-            <ProtectedRoute>
-              <MyOrders />
-            </ProtectedRoute>
-          }
-        />
-        <Route
-          path="orders/:id"
-          element={
-            <ProtectedRoute>
-              <MyOrders />
-            </ProtectedRoute>
-          }
-        />
-        <Route
-          path="profile"
-          element={
-            <ProtectedRoute>
-              <Profile />
-            </ProtectedRoute>
-          }
-        />
-        <Route
-          path="messages/:chatId?"
-          element={
-            <ProtectedRoute roles={["customer"]}>
-              <Messages />
-            </ProtectedRoute>
-          }
-        />
-        <Route path="unauthorized" element={<Unauthorized />} />
-        <Route path="*" element={<NotFound />} />
-      </Route>
-
-      {/* ---------- Admin / cashier ---------- */}
-      <Route
-        path="admin"
-        element={
-          <ProtectedRoute roles={["admin", "cashier"]}>
-            <AdminLayout />
-          </ProtectedRoute>
-        }
-      >
-        <Route index element={<AdminHome />} />
-        <Route
-          path="messages/:chatId?"
-          element={
-            <ProtectedRoute roles={["admin"]}>
-              <Messages />
-            </ProtectedRoute>
-          }
-        />
-        <Route
-          path="reviews"
-          element={
-            <ProtectedRoute roles={["admin"]}>
-              <ManageReviews />
-            </ProtectedRoute>
-          }
-        />
-        <Route
-          path="preparation"
-          element={
-            <ProtectedRoute roles={["admin", "cashier"]}>
-              <PreparationQueue />
-            </ProtectedRoute>
-          }
-        />
-        <Route path="pos" element={<POS />} />
-        <Route path="orders" element={<Orders />} />
-        <Route path="inventory" element={<Inventory />} />
-        {adminOnlyPages.map(([path, Page]) => (
-          <Route
-            key={path}
-            path={path}
-            element={
-              <ProtectedRoute roles={["admin"]}>
-                <Page />
-              </ProtectedRoute>
-            }
-          />
-        ))}
-      </Route>
-    </Routes>
-  );
-}
+app.use((req, res) => res.status(404).json({ message: "Endpoint not found." }));
+app.use(errorHandler);

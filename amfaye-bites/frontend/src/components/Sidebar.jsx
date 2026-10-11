@@ -19,6 +19,7 @@ import {
   Settings,
   LogOut,
   ArrowUpRight,
+  Banknote,
 } from "lucide-react";
 import { Logo } from "./Navbar";
 import { useAuth } from "../context/AuthContext";
@@ -35,6 +36,7 @@ const links = [
   ["sales", "Sales", ChartNoAxesCombined],
   ["reports", "Reports", FileChartColumn],
   ["cash-drawer", "Cash drawer", Wallet],
+  ["refunds", "Refunds", Banknote],
   ["analytics", "Analytics", BarChart3],
   ["users", "Users", UserCog],
   ["settings", "Settings", Settings],

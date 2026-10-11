@@ -36,6 +36,8 @@ import Users from "./pages/admin/Users";
 import Settings from "./pages/admin/Settings";
 import PromotionsAdmin from "./pages/admin/PromotionsAdmin";
 import ShiftReport from "./pages/admin/ShiftReport";
+import RefundsAdmin from "./pages/admin/RefundsAdmin";
+import RefundRequest from "./pages/RefundRequest";
 import { useAuth } from "./context/AuthContext";
 import ChatBot from "./components/ChatBot";
 
@@ -135,6 +137,7 @@ export default function App() {
           }
         />
         <Route path="messages/:chatId?" element={<ProtectedRoute roles={["customer"]}><Messages /></ProtectedRoute>} />
+        <Route path="refunds/request" element={<ProtectedRoute roles={["customer"]}><RefundRequest /></ProtectedRoute>} />
 <Route path="products/:id/reviews" element={<Reviews />} />
 <Route path="unauthorized" element={<Unauthorized />} />
         <Route path="*" element={<NotFound />} />
@@ -165,6 +168,7 @@ export default function App() {
           ["analytics", Analytics],
           ["users", Users],
           ["settings", Settings],
+          ["refunds", RefundsAdmin],
         ].map(([path, Page]) => (
           <Route
             key={path}

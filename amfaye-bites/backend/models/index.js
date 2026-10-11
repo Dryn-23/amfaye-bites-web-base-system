@@ -282,3 +282,35 @@ export const AuditLog = model(
 );
 
 export { default as Notification } from "./Notification.js";
+export { default as QualityComplaint } from "./QualityComplaint.js";
+export const Refund = model(
+  "Refund",
+  {
+    order: { ...ref("Order", true) },
+    customer: { ...ref("User", true) },
+    items: [
+      {
+        product: ref("Product"),
+        name: { ...str, required: true },
+        quantity: { type: Number, min: 0 },
+        unitPrice: { type: Number, min: 0 },
+      },
+    ],
+    amount: { ...money },
+    reason: { ...str, maxlength: 2000 },
+    status: {
+      type: String,
+      enum: ["Pending", "Approved", "Rejected"],
+      default: "Pending",
+    },
+    note: { ...str, maxlength: 2000 },
+    requestedBy: { ...ref("User", true) },
+    processedBy: ref("User"),
+    processedAt: Date,
+  },
+  [
+    [{ order: 1, status: 1 }, {}],
+    [{ customer: 1, createdAt: -1 }, {}],
+    [{ order: 1 }, { partialFilterExpression: { status: "Pending" } }],
+  ],
+);
