@@ -22,6 +22,7 @@ import quality from "./routes/qualityRoutes.js";
 import flashSales from "./routes/flashSales.js";
 import bundles from "./routes/bundles.js";
 import refunds from "./routes/refundRoutes.js";
+import seedProducts from "./routes/seedRoutes.js";
 import { errorHandler } from "./middleware/errorMiddleware.js";
 
 export const app = express();
@@ -107,6 +108,7 @@ for (const [path, router] of Object.entries(routes)) {
 }
 
 app.use("/api", extras);
+app.use("/api/admin/seed-products", seedProducts);
 
 app.use((req, res) => res.status(404).json({ message: "Endpoint not found." }));
 app.use(errorHandler);
