@@ -124,6 +124,12 @@ export default function RefundRequest() {
         <h1>Request a refund</h1>
         <p>Order {order?.number}</p>
       </div>
+      {order?.paymentStatus !== "Paid" && (
+        <p className="muted small">
+          This order hasn't been paid yet. You can submit the request now, but
+          staff can only approve it after payment is collected.
+        </p>
+      )}
       <form className="panel stack" onSubmit={submit}>
         {error && <p className="error" role="alert">{error}</p>}
 

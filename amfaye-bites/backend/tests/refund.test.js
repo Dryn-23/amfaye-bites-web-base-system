@@ -151,12 +151,12 @@ test("Refund validation rules", async () => {
   const pending = (
     await call("post", "/orders", alice, orderBody([{ product: pastry._id, quantity: 1 }]))
   ).body;
-  // Unpaid order cannot be refunded.
+  // Unpaid order can be requested, but not approved until paid.
   const unPaid = await call("post", "/refunds", alice, {
     order: pending._id,
     reason: "too slow",
   });
-  assert.equal(unPaid.status, 409);
+  assert.equal(unPaid.status, 201);
 
   const paid = (
     await call("post", "/orders", alice, orderBody([{ product: pastry._id, quantity: 1 }]))

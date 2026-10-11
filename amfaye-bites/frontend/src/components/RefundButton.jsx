@@ -19,7 +19,13 @@ export default function RefundButton({ order }) {
       .catch(() => setStatus(null));
   }, [user, order]);
 
-  if (!user || user.role !== "customer" || order.paymentStatus !== "Paid") return null;
+  if (
+    !user ||
+    user.role !== "customer" ||
+    order.paymentStatus === "Voided" ||
+    order.status === "Cancelled"
+  )
+    return null;
 
   if (status) {
     return (

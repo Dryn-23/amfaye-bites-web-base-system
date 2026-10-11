@@ -50,8 +50,8 @@ r.post("/", wrap(async (req, res) => {
   if (!order) throw fail(404, "Order not found.");
   if (String(order.user) !== String(req.user._id))
     throw fail(403, "You can only request a refund for your own order.");
-  if (order.paymentStatus !== "Paid")
-    throw fail(409, "Refunds are only available for paid orders.");
+  if (order.paymentStatus === "Voided" || order.status === "Cancelled")
+    throw fail(409, "Refunds are not available for voided or cancelled orders.");
 
   const pending = await Refund.findOne({ order: order._id, status: "Pending" }).lean();
   if (pending) throw fail(409, "A refund request for this order is already pending.");

@@ -24,7 +24,7 @@ function RefundCard({ c, onClose, onUpdate }) {
         </div>
 
         <dl className="stack tight">
-          <div><dt>Order</dt><dd>{c.order?.number || "—"}</dd></div>
+          <div><dt>Order</dt><dd>{c.order?.number || "—"} <span className="muted">({c.order?.paymentStatus || "—"})</span></dd></div>
           <div><dt>Customer</dt><dd>{c.customer?.name || "—"}</dd></div>
           <div><dt>Requested</dt><dd>{new Date(c.createdAt).toLocaleString()}</dd></div>
           <div><dt>Amount requested</dt><dd><strong>{c.amount != null ? money(c.amount) : "—"}</strong></dd></div>
@@ -65,7 +65,12 @@ function RefundCard({ c, onClose, onUpdate }) {
               <button
                 className="button small"
                 onClick={() => onUpdate(c._id, "Approved", note)}
-                title="Approve — voids payment and sale"
+                disabled={c.order?.paymentStatus !== "Paid"}
+                title={
+                  c.order?.paymentStatus === "Paid"
+                    ? "Approve — voids payment and sale"
+                    : "Order is not paid yet — approve is unavailable"
+                }
               >
                 <CheckCircle size={14} /> Approve
               </button>
@@ -217,7 +222,12 @@ export default function RefundsAdmin() {
                         <button
                           className="button small outline"
                           onClick={() => updateStatus(c._id, "Approved")}
-                          title="Approve — voids payment and sale"
+                          disabled={c.order?.paymentStatus !== "Paid"}
+                          title={
+                            c.order?.paymentStatus === "Paid"
+                              ? "Approve — voids payment and sale"
+                              : "Order is not paid yet — approve is unavailable"
+                          }
                         >
                           <CheckCircle size={14} /> Approve
                         </button>
