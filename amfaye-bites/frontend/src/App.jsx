@@ -37,6 +37,7 @@ import Settings from "./pages/admin/Settings";
 import PromotionsAdmin from "./pages/admin/PromotionsAdmin";
 import ShiftReport from "./pages/admin/ShiftReport";
 import RefundsAdmin from "./pages/admin/RefundsAdmin";
+import RefundReports from "./pages/admin/RefundReports";
 import RefundRequest from "./pages/RefundRequest";
 import { useAuth } from "./context/AuthContext";
 import ChatBot from "./components/ChatBot";
@@ -169,6 +170,7 @@ export default function App() {
           ["users", Users],
           ["settings", Settings],
           ["refunds", RefundsAdmin],
+          ["refund-reports", RefundReports],
         ].map(([path, Page]) => (
           <Route
             key={path}

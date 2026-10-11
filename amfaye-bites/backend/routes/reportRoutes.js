@@ -14,6 +14,7 @@ for (const name of [
   "paymentMethods",
   "monthlyComparison",
   "cashDrawer",
+  "refunds",
 ])
   r.get(
     "/" + name,

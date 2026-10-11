@@ -1,4 +1,4 @@
-import { Sale, Order, Ingredient, Payment, User } from "../models/index.js";
+import { Sale, Order, Ingredient, Payment, User, Refund } from "../models/index.js";
 import { z } from "zod";
 import { Types } from "mongoose";
 import { id } from "../utils/validators.js";
@@ -221,5 +221,65 @@ export async function cashDrawer(query) {
       }),
       { orders: 0, sales: 0, received: 0, change: 0, expected: 0 },
     ),
+  };
+}
+
+export async function refunds(query) {
+  const filter = { status: "Approved", ...dates(query) };
+  const [entries, summary, daily] = await Promise.all([
+    Refund.find(filter)
+      .populate("order", "number paymentStatus")
+      .populate("customer", "name email")
+      .populate("processedBy", "name")
+      .sort({ processedAt: -1, createdAt: -1 })
+      .limit(500),
+    Refund.aggregate([
+      { $match: filter },
+      {
+        $group: {
+          _id: null,
+          totalRefunded: { $sum: "$amount" },
+          count: { $sum: 1 },
+        },
+      },
+    ]),
+    Refund.aggregate([
+      { $match: filter },
+      {
+        $group: {
+          _id: {
+            $dateToString: {
+              format: "%Y-%m-%d",
+              date: "$processedAt",
+              timezone: "Asia/Manila",
+            },
+          },
+          total: { $sum: "$amount" },
+          count: { $sum: 1 },
+        },
+      },
+      { $sort: { _id: 1 } },
+    ]),
+  ]);
+  const counts = await Refund.aggregate([
+    { $match: dates(query) },
+    {
+      $group: {
+        _id: "$status",
+        count: { $sum: 1 },
+        amount: { $sum: "$amount" },
+      },
+    },
+  ]);
+  return {
+    entries,
+    summary: {
+      totalRefunded: round(summary[0]?.totalRefunded || 0),
+      count: summary[0]?.count || 0,
+      pending: round(counts.find((c) => c._id === "Pending")?.amount || 0),
+      rejected: round(counts.find((c) => c._id === "Rejected")?.amount || 0),
+    },
+    daily,
+    counts,
   };
 }

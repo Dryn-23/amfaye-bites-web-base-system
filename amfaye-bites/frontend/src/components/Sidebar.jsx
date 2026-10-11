@@ -37,6 +37,7 @@ const links = [
   ["reports", "Reports", FileChartColumn],
   ["cash-drawer", "Cash drawer", Wallet],
   ["refunds", "Refunds", Banknote],
+  ["refund-reports", "Refund Report", Banknote],
   ["analytics", "Analytics", BarChart3],
   ["users", "Users", UserCog],
   ["settings", "Settings", Settings],
