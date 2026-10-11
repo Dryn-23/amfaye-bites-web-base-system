@@ -56,9 +56,7 @@ export default function Menu() {
         <div className="tabs">
           {[
             "All",
-            ...categories
-              .filter((c) => ["Pastries", "Fruit Shakes"].includes(c.name))
-              .map((c) => c.name),
+            ...categories.map((c) => c.name),
           ].map((c) => (
             <button
               key={c}
